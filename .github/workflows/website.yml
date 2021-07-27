@@ -1,0 +1,39 @@
+name: website
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+      - lambda/website/**
+
+jobs:
+  container-job:
+    runs-on: ubuntu-latest
+
+    container:
+      image:  node:14.16.0-alpine3.10
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - run: npm install --production
+      working-directory: ./lambda/website
+
+    - run: apk add --update zip python python-dev py-pip build-base
+      working-directory: ./
+
+    - run: pip install awscli
+      working-directory: ./
+
+    - run: zip -rq deploy.zip *
+      working-directory: ./lambda/website
+
+    - run: aws s3 cp ./deploy.zip s3://${PROJECT_TARGET_S3ZIP_BUCKET}/${PROJECT_TARGET_S3ZIP_KEY}
+      working-directory: ./lambda/website
+      env:
+         AWS_ACCESS_KEY_ID: AKIAU2NDJK3EFC4PGASD
+         AWS_SECRET_ACCESS_KEY: ${{ secrets.KEYSECRET_AKIAU2NDJK3EFC4PGASD }}
+         AWS_DEFAULT_REGION: eu-central-1
+         PROJECT_TARGET_S3ZIP_BUCKET: epilot-deploy-bucket-eu-central-1
+         PROJECT_TARGET_S3ZIP_KEY: website.zip
