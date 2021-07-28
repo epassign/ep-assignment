@@ -61,7 +61,12 @@ module.exports = function(event, cb) {
 			body: JSON.stringify({
 				success: true,
 				session,
-				user,
+				user: {
+					user_id: user.user_id,
+					username: user.username,
+					name: user.name,
+					avatar: 'https://i.imgur.com/C4egmYM.jpg',
+				},
 			}, null, "\t")
 		})
 	})
