@@ -4,6 +4,9 @@ bcrypt = require('bcryptjs');
 async = require('async');
 DynamoDB = require('@awspilot/dynamodb')()
 
+DynamoDB.schema({ TableName: 'users', KeySchema: [ {AttributeName: 'user_id' } ] })
+DynamoDB.schema({ TableName: 'guess', KeySchema: [ {AttributeName: 'user_id' }, {AttributeName: 'guess_id' } ] })
+
 
 const payloader = require('./payload');
 
