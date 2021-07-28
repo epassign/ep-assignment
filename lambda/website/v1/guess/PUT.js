@@ -35,7 +35,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch(( err ) => {
-					return cb({ success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed getting your session', debug: err })
+					cb({ success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed getting your session', debug: err })
 				})
 		},
 
