@@ -27,7 +27,7 @@ module.exports = function(event, cb) {
 
 					raw = data;
 
-					for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date().getTime(); start+=1000*30 ) {
+					for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date( data[0].minute + ':00.00Z' ).getTime(); start+=1000*30 ) {
 						usd_history[ new Date(new Date(start).toISOString().slice(0,16) + ':00.00Z').getTime() ] = 0
 					}
 
