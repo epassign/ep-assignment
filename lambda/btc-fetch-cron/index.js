@@ -20,14 +20,12 @@ exports.handler = function( event, context , cb ) {
 			var url = "https://blockchain.info/ticker";
 
 			request(url, function (err, response, body) {
-
-				if (err) {
-					console.log("ticker", err)
+				console.log(err ? '☐' : '☑', "request ", url, err )
+				if (err)
 					return cb()
-				}
 
 				if ( response.statusCode !== 200 )
-					return cb()
+					return console.log("response.statusCode", response.statusCode ) || cb()
 
 				//console.log("ticker=", typeof body, body )
 
@@ -71,7 +69,7 @@ exports.handler = function( event, context , cb ) {
 				})
 		}
 
-	], function() {
+	], function( err ) {
 
 		console.log('done')
 
