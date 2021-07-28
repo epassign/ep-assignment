@@ -11,8 +11,9 @@ module.exports = function( event, cb ) {
 		<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
 		<script src="https://${process.env.cdn_master}/ep-assignment.min.js"></script>
 
-		<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-		<script src="https://cdn.jsdelivr.net/npm/react-apexcharts"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@3.4.1/dist/chart.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/react-chartjs-2@3.0.4/dist/index.min.js"></script>
 	</head>
 	<body>
 
