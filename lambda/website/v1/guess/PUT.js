@@ -104,7 +104,7 @@ console.log("guess", event )
 							user_id: user.user_id,
 							guess_id: new_guess_id,
 							created_at: new Date().getTime(),
-							next: this._POST.next,
+							next: event._POST.next,
 							currency: 'USD',
 							initial_rate: event._POST.rate,
 							final_rate: null,
