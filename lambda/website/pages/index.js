@@ -12,7 +12,7 @@ module.exports = function( event, cb ) {
 		<script src="https://${process.env.cdn_master}/ep-assignment.min.js"></script>
 
 
-		<script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/recharts@2.0.10/umd/Recharts.js"></script>
 
 	</head>
 	<body>
