@@ -6,6 +6,7 @@ module.exports = function( event, cb ) {
 		<html>
 			<head>
 				<title>Not Found</title>
+				<meta charset="UTF-8">
 				<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 			</head>
 			<body>
