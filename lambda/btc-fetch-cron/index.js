@@ -63,6 +63,11 @@ exports.handler = function( event, context , cb ) {
 					eur: rate.eur,
 					usd: rate.usd,
 				})
+				.then(cb)
+				.catch((err) => {
+					console.log(err)
+					cb()
+				})
 		}
 
 	], function() {
