@@ -35,6 +35,7 @@ console.log("guess", event )
 					cb()
 				})
 				.catch(( err ) => {
+					console.log( err )
 					cb({ success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed getting your session', debug: err })
 				})
 		},
@@ -42,6 +43,7 @@ console.log("guess", event )
 
 		// get user
 		( cb ) => {
+
 			DynamoDB
 				.table('users')
 				.where('user_id').eq( session.user_id )
@@ -59,7 +61,8 @@ console.log("guess", event )
 					cb()
 				})
 				.catch((err) => {
-					cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed getting your session' })
+					console.log( err )
+					cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed getting your session', debug: err })
 				})
 		},
 
@@ -82,6 +85,7 @@ console.log("guess", event )
 					cb()
 				})
 				.catch((err) => {
+					console.log( err )
 					cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Error getting the most recent BTC rate'})
 				})
 		},
