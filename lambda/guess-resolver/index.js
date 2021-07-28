@@ -127,6 +127,7 @@ exports.handler = function( event, context ) {
 						.update( {
 							final_rate: current_usd_rate,
 							coins,
+							all: 1, // include it in the recents index
 						})
 				.write()
 				.then(( data ) => {
