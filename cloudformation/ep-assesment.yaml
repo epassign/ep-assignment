@@ -1,0 +1,586 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+
+    DeployBucketName:
+        Type: String
+        Default: ep-assesment-deploy-bucket-region
+        Description: ORGNAME-deploy-bucket-REGION
+
+
+    CdnBucketName:
+        Type: String
+        Description: cdn(dev).domain.com
+
+
+    WebsiteLambdaSize:
+        Default: 256
+        Type: Number
+        AllowedValues: [ 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024, 1088, 1152, 1216, 1280, 1344, 1408, 1472, 1536, 1600, 1664, 1728, 1792, 1856, 1920, 1984, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 2560, 2624, 2688, 2752, 2816, 2880, 2944, 3008 ]
+
+    WebsiteLambdaNodeVersion:
+        Default: nodejs14.x
+        Type: String
+        AllowedValues: [ nodejs12.x, nodejs14.x ]
+
+
+Resources:
+
+    # role for lambda deployment function, lambda function will take the zip from s3 and update lambda function
+    LambdaDeploymentRole:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Principal: {Service: [lambda.amazonaws.com]}
+              Action: ['sts:AssumeRole']
+          Path: /
+          ManagedPolicyArns:
+          - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          Policies:
+          - PolicyName: S3Policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Sid: AccessToGetS3File
+                  Action:
+                    - 'S3:GetObject'
+                    - 'S3:GetObjectTagging'
+                  Resource: !Sub "arn:aws:s3:::${DeployBucketName}/*"
+                - Effect: Allow
+                  Sid: AccessToLambdaUpload
+                  Action:
+                    - lambda:updateFunctionCode
+                  Resource: '*'
+
+    # LambdaDeploymentLog:
+    #     Type: AWS::Logs::LogGroup
+    #     Properties:
+    #       LogGroupName: /aws/lambda/s3-to-lambda
+    #       RetentionInDays: 3
+
+    # actual function that will take the .zip and upload it to AWS Lambda
+    LambdaDeployment:
+        Type: AWS::Lambda::Function
+        DependsOn: [ LambdaDeploymentRole ]
+        Properties:
+            #FunctionName: s3-to-lambda
+            MemorySize: 128
+            Handler: index.handler
+            Role: !GetAtt LambdaDeploymentRole.Arn
+            Runtime: nodejs12.x
+            Timeout: 300
+            Environment:
+                Variables:
+                    deploy_bucket: !Sub "${DeployBucketName}"
+            Code:
+                ZipFile: >
+                            console.log('Loading function');
+                            var AWS = require('aws-sdk');
+                            var lambda = new AWS.Lambda();
+                            exports.handler = function(event, context) {
+                                var key = event.Records[0].s3.object.key
+                                var bucket = event.Records[0].s3.bucket.name
+                                var version = event.Records[0].s3.object.versionId
+
+                                if ( bucket !== process.env.deploy_bucket )
+                                    return context.done()
+
+                                var functionName = key.slice(0,-4); // remove .zip
+
+                                console.log('uploading lambda function: ' + functionName)
+                                var params = {
+                                    FunctionName: functionName,
+                                    S3Key: key,
+                                    S3Bucket: bucket,
+                                };
+                                lambda.updateFunctionCode(params, function(err, data) {
+                                    if (err) {
+                                        console.log('failed uploading function',err);
+                                        context.done()
+                                    } else {
+                                        console.log('uploaded function code')
+                                        context.done();
+                                    }
+                                });
+                            };
+
+    # grant Github access to putObject on deploy bucket 
+    GithubActionsIamUser:
+      Type: AWS::IAM::User
+      Properties:
+        Path: /
+        #UserName: "GithubActions"
+        Policies:
+        - PolicyName: github-access-to-s3
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+               - Effect: Allow
+                 Sid: GithubAccessToS3PutObject
+                 Action:
+                   - S3:PutObject
+                 Resource: !Sub "arn:aws:s3:::${DeployBucketName}/*"
+
+    GithubActionsKey:
+        Type: AWS::IAM::AccessKey
+        DependsOn: [ GithubActionsIamUser ]
+        Properties:
+            UserName: !Ref GithubActionsIamUser
+
+    # permissions for s3 to execute Lambda on s3 upload
+    DeployBucketPermission:
+        Type: AWS::Lambda::Permission
+        DependsOn: [ LambdaDeployment ]
+        Properties:
+          Action: 'lambda:InvokeFunction'
+          FunctionName: !GetAtt LambdaDeployment.Arn
+          Principal: s3.amazonaws.com
+          SourceAccount: !Ref "AWS::AccountId"
+          SourceArn: !Sub "arn:aws:s3:::${DeployBucketName}"
+
+    # bucket configured to execute lambda on s3 upload
+    DeployBucket:
+        Type: AWS::S3::Bucket
+        DependsOn: [ LambdaDeployment, DeployBucketPermission ]
+        Properties:
+            BucketName: !Ref DeployBucketName
+            NotificationConfiguration:
+                LambdaConfigurations:
+                     - Event: 's3:ObjectCreated:*'
+                       Function: !GetAtt LambdaDeployment.Arn
+
+
+
+
+
+
+
+
+
+
+
+    # sync to cdn
+    SyncUser:
+      Type: AWS::IAM::User
+      Properties:
+        Path: /
+        Policies:
+        - PolicyName: s3SyncToCdn
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+               - Effect: Allow
+                 Sid: AccessToSyncToCdn
+                 Action:
+                   - 's3:PutObject'
+                   - 's3:PutObjectAcl'
+                 Resource:
+                    - !Sub "arn:aws:s3:::${CdnBucketName}/*"
+
+    SyncUserKey:
+      Type: AWS::IAM::AccessKey
+      DependsOn: [ SyncUser ]
+      Properties:
+        UserName:
+          !Ref SyncUser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # role for lambda deployment function, lambda function will take the zip from s3 and update lambda function
+    DecoyS3Role:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Principal: {Service: [lambda.amazonaws.com]}
+              Action: ['sts:AssumeRole']
+          Path: /
+          ManagedPolicyArns:
+          - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          Policies:
+          - PolicyName: S3Policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Sid: AccessToGetS3File
+                  Action:
+                    - 'S3:PutObject'
+                    - 'S3:DeleteObject'
+                  Resource: !Sub "arn:aws:s3:::${DeployBucketName}/*"
+                - Effect: Allow
+                  Sid: AccessToLambdaUpload
+                  Action:
+                    - lambda:updateFunctionCode
+                  Resource: '*'
+
+
+    S3OnDemand:
+        Type: AWS::Lambda::Function
+        DependsOn: [ DecoyS3Role ]
+        Properties:
+            MemorySize: 128
+            Handler: index.handler
+            Role: !GetAtt DecoyS3Role.Arn
+            Runtime: nodejs12.x
+            Timeout: 300
+            Code:
+                ZipFile: >
+                            var AWS = require('aws-sdk');
+                            var s3 = new AWS.S3();
+                            // event.RequestType = Create, Update, Delete
+                            // event.ResourceType = Custom::XXXX
+                            
+                            var response = require('cfn-response');
+                            const empty_zip_b64='UEsDBBQACAAIABWk+1IAAAAAAAAAAFEAAAAIACAAaW5kZXguanNVVA0ABztDAGE8QwBhO0MAYXV4CwABBPgBAAAEFAAAABXGSwqAIBQF0LmruDMVpAUELcbPiyJ5hmkY4t6r0TnUzpTLNW2WQ6SMBWtlX/bECnQTFwOfuFD746DRPxTXGA26S+GZIV20fEgzNIYQL1BLBwios3wTTgAAAFEAAABQSwECFAMUAAgACAAVpPtSqLN8E04AAABRAAAACAAgAAAAAAAAAAAApIEAAAAAaW5kZXguanNVVA0ABztDAGE8QwBhO0MAYXV4CwABBPgBAAAEFAAAAFBLBQYAAAAAAQABAFYAAACkAAAAAAA=';
+
+                            exports.handler = function(event, context) {
+                            
+                                console.log( event.RequestType, event.ResourceProperties )
+                            
+                                if (event.RequestType === 'Create') {
+                                  var params = {
+                                    Body: new Buffer(empty_zip_b64, 'base64'), 
+                                    Bucket: event.ResourceProperties.Bucket, 
+                                    Key: event.ResourceProperties.Key
+                                  };
+                                  s3.putObject(params, function(err, data) {
+                                    if (err)
+                                      return console.log(err) || response.send(event, context, response.FAILED, err )
+                                    
+                                    response.send(event, context, response.SUCCESS, { id: event.ResourceProperties.id } )
+                                  })
+                                  return 
+                                }
+                                if (event.RequestType === 'Update') {
+                                  return response.send(event, context, response.SUCCESS, { id: event.ResourceProperties.id } )
+                                }
+                                if (event.RequestType === 'Delete') {
+                                  var params = {
+                                    Bucket: event.ResourceProperties.Bucket, 
+                                    Key: event.ResourceProperties.Key
+                                  };
+                                  s3.deleteObject(params, function(err, data) {
+                                    if (err)
+                                      return console.log(err) || response.send(event, context, response.FAILED, err )
+                                    
+                                    response.send(event, context, response.SUCCESS, { id: event.ResourceProperties.id } )
+                                  })
+                                  return 
+                                }
+                                
+                                response.send(event, context, response.SUCCESS , { id: event.ResourceProperties.id } )
+                                
+                            };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    CdnBucket:
+        Type: AWS::S3::Bucket
+        #DeletionPolicy: Retain
+        Properties:
+            AccessControl: PublicRead
+            BucketName: !Sub "${CdnBucketName}"
+            WebsiteConfiguration:
+                IndexDocument: index.html
+                ErrorDocument: error.html
+            CorsConfiguration:
+                CorsRules:
+                    -
+                        AllowedHeaders: [ "*" ]
+                        AllowedMethods: [ "GET" ]
+                        AllowedOrigins : [ "*" ]
+                        MaxAge: 3000
+
+    CDN:
+        Type: AWS::CloudFront::Distribution
+        DependsOn: [ CdnBucket ]
+        Properties:
+            DistributionConfig:
+                Origins:
+                    -
+                      DomainName: !GetAtt CdnBucket.DomainName
+                      Id: s3-b
+                      S3OriginConfig: {}
+                Enabled: True
+                DefaultCacheBehavior:
+                  Compress: true
+                  AllowedMethods: [ "GET", "HEAD", "OPTIONS" ]
+                  TargetOriginId: s3-b
+                  ForwardedValues:
+                    QueryString: false
+                    Cookies:
+                      Forward: none
+                  ViewerProtocolPolicy: allow-all
+                  MinTTL: 0
+                  MaxTTL: 0
+                  DefaultTTL: 0
+                DefaultRootObject: index
+                IPV6Enabled: true
+                PriceClass: PriceClass_All
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    WebsiteLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                - lambda.amazonaws.com
+              Action:
+              - sts:AssumeRole
+          Path: "/"
+          Policies:
+          - PolicyName: root
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+              - Effect: Allow
+                Action:
+                - logs:*
+                Resource: arn:aws:logs:*:*:*
+
+              - Effect: Allow
+                Action:
+                - 'dynamodb:*'
+                Resource: '*'
+
+    WebsiteLog:
+        Type: AWS::Logs::LogGroup
+        Properties:
+          LogGroupName: /aws/lambda/website
+          RetentionInDays: 3
+
+    # create website.zip into deploy bucket
+    DecoyWebsiteZip:
+        Type: Custom::S3Zip
+        DependsOn: [ S3OnDemand, DeployBucket ]
+        Properties:
+            ServiceToken: !GetAtt S3OnDemand.Arn
+            id: website
+            Bucket: !Ref DeployBucketName
+            Key: website.zip
+
+    WebsiteLambdaFunction:
+        Type: AWS::Lambda::Function
+        DependsOn: [ DecoyWebsiteZip, CDN ]
+        Properties:
+            FunctionName: website
+            MemorySize: !Ref WebsiteLambdaSize
+            Handler: index.handler
+            Role: !GetAtt WebsiteLambdaRole.Arn
+            Runtime: !Ref WebsiteLambdaNodeVersion
+            Timeout: 20
+            Layers:
+               - !Sub "arn:aws:lambda:${AWS::Region}:452980636694:layer:awspilot-dynamodb-2_0_0:1"
+            Environment:
+                Variables:
+                    cdn_master:  !GetAtt CDN.DomainName
+                    #cdn_staging: !GetAtt CDNDEV.DomainName
+            Code:
+                S3Bucket: !Ref DeployBucketName
+                S3Key: website.zip
+
+    ApiGwPermissionToRunLambda:
+        Type: AWS::Lambda::Permission
+        Properties:
+          Action: lambda:InvokeFunction
+          FunctionName: !Ref WebsiteLambdaFunction
+          Principal: apigateway.amazonaws.com
+
+    WEBSITE:
+      Type: AWS::ApiGatewayV2::Api
+      Properties:
+        Name: WEBSITE
+        Description: ep-assignment
+        ProtocolType: HTTP
+        Target: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:website/invocations"
+
+    # WebsiteDomain:
+    #     Type: AWS::ApiGatewayV2::DomainName
+    #     Properties:
+    #         DomainName: sketch.ws
+    #         DomainNameConfigurations:
+    #            -
+    #               EndpointType: REGIONAL
+    #               CertificateArn: "arn:aws:acm:us-east-1:331591800520:certificate/82331d04-8175-423b-ab32-03c6254db660"
+    #               SecurityPolicy: TLS_1_2
+
+    # WebsiteMapping:
+    #     Type: AWS::ApiGatewayV2::ApiMapping
+    #     DependsOn: [ WebsiteDomain, WEBSITE ]
+    #     Properties:
+    #         DomainName: !Ref WebsiteDomain
+    #         ApiId: !Ref WEBSITE
+    #         Stage: $default
+
+    # WebsiteDomainRecordSet:
+    #     Type: AWS::Route53::RecordSet
+    #     DependsOn: [ WebsiteDomain ]
+    #     Properties:
+    #       HostedZoneId: !ImportValue DomainZone
+    #       Name: sketch.ws
+    #       Type: A
+    #       AliasTarget:
+    #             DNSName: !GetAtt WebsiteDomain.RegionalDomainName # AWS::ApiGatewayV2::DomainName
+    #             HostedZoneId: !GetAtt WebsiteDomain.RegionalHostedZoneId
+
+
+
+
+
+
+
+
+
+Outputs:
+    DeployBucketName:
+        Value: !Ref DeployBucketName
+        Export:
+            Name: DeployBucketName
+
+    GithubActionsKey:
+        Description: Key for github actions
+        Value: !Ref GithubActionsKey
+        Export:
+            Name: GithubActionsKey
+
+    GithubActionsSecret:
+        Description: Secret for github actions
+        Value: !GetAtt GithubActionsKey.SecretAccessKey
+        Export:
+            Name: GithubActionsSecret
+
+    SyncAccessKey:
+        Description: AccessKey ( manual version )
+        Value: !Ref SyncUserKey
+        Export:
+            Name: AccessKey
+    SyncSecretAccessKey:
+        Description: SecretAccessKey ( manual version )
+        Value: !GetAtt SyncUserKey.SecretAccessKey
+        Export:
+            Name: SecretAccessKey
