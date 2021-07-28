@@ -49,6 +49,10 @@ exports.handler = function( event, context ) {
 
 		// check if rate has changed
 		( cb ) => {
+
+			console.log("initial rate=", event._POST.guess.initial_rate )
+			console.log("current rate=", current_usd_rate )
+			
 			if ( event._POST.guess.initial_rate === current_usd_rate )
 				return 
 					console.log("rate didnt change, sleeping") || cb({
@@ -64,6 +68,20 @@ exports.handler = function( event, context ) {
 
 		// rate has changed, resolve and exit
 		( cb ) => {
+
+			var points = 0;
+
+			if (event._POST.guess.initial_rate > current_usd_rate) {
+				// went down
+				points = event._POST.guest.down === 'down' ? 1 : -1;
+			} else {
+				// went up
+				points = event._POST.guest.down === 'up'   ? 1 : -1;
+			}
+
+
+			console.log("got ", points, " points")
+
 			cb()
 		},
 
