@@ -57,7 +57,7 @@ module.exports = function(event, cb) {
 						return cb({success: false, errorCode: 'USER_NOT_FOUND', errorMessage: 'Failed getting your session' })
 
 
-					if (data.hasOwnProperty('guess_id') )
+					if (data.guess_id !== null ) // null means no pending guess
 						return cb({success: false, errorCode: 'USER_NOT_FOUND', errorMessage: 'Another guess in progress' })
 
 					user = data
@@ -112,7 +112,7 @@ module.exports = function(event, cb) {
 				.transact()
 					.table('users')
 						.where('user_id').eq( user.user_id )
-						.if('guess_id').not().exists()
+						.if('guess_id').eq( null )
 						.update({guess_id: new_guess_id})
 					.table('guess')
 						.insert( guess )
