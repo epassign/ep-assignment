@@ -1,7 +1,7 @@
 
 module.exports = function(event, cb) {
 
-
+console.log("guess", event )
 	var session;
 	var user;
 	var new_guess_id = ((new Date().getTime()* 1000) + Math.round(Math.random() * 1000)).toString(16);
