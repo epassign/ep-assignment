@@ -44,7 +44,7 @@ module.exports = function(event, cb) {
 
 			// fine
 			cb()
-		}
+		},
 
 		// create the session
 		( cb ) => {
