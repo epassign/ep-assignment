@@ -53,15 +53,17 @@ exports.handler = function( event, context ) {
 			console.log("initial rate=", event._POST.guess.initial_rate )
 			console.log("current rate=", current_usd_rate )
 			
-			if ( event._POST.guess.initial_rate === current_usd_rate )
-				return 
-					console.log("rate didnt change, sleeping") || cb({
-						_POST: event._POST,
-						sleep: 30, // speep 30 seconds
-						end: false, // exit if failed
-					})
+			if ( event._POST.guess.initial_rate !== current_usd_rate )
+				return cb()
 
-			cb()
+			console.log("rate didnt change, sleeping")
+			
+			cb({
+				_POST: event._POST,
+				sleep: 30, // speep 30 seconds
+				end: false, // exit if failed
+			})
+
 		},
 
 
