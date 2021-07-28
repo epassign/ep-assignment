@@ -1,7 +1,4 @@
 
-var bcrypt = require('bcryptjs');
-var async = require('async');
-
 module.exports = function(event, cb) {
 
 
@@ -80,15 +77,9 @@ module.exports = function(event, cb) {
 			DynamoDB
 				.table('sessions')
 				.insert_or_replace({
-					id:  session_id,
-					device_id: event._COOKIES.did,
-
-					logged: true,
+					session_id:  session_id,
 					user_id: event._POST.user_id,
-
 					created_at: new Date().getTime(),
-					updated_at: new Date().getTime(),
-
 				})
 				.then(() => {
 					cb()
