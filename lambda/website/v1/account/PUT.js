@@ -1,16 +1,17 @@
 
 var bcrypt = require('bcryptjs');
+var async = require('async');
 
 module.exports = function(event, cb) {
 
-	import { waterfall } from 'async';
+
 
 	var username = (event._POST.username || '').toLowerCase()
 	var session_id = 'xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxy'.replace(/[xy]/g, function(c) { var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8); return v.toString(16); })
 	var new_user_id = 'user-xxxxxxxxxxx'.replace(/[xy]/g, function(c) { var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8); return v.toString(16); })
 
 
-	waterfall([
+	async.waterfall([
 
 		( cb ) => {
 			DynamoDB
