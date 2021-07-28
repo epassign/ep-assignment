@@ -13,8 +13,12 @@ module.exports = function( event, cb ) {
 
 
 
+		<script src="https://${process.env.cdn_master}/apexcharts.min.js"></script>
+		
+		<!-- 
 		<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 		<script src="https://cdn.jsdelivr.net/npm/react-apexcharts"></script>
+		-->
 	</head>
 	<body>
 
