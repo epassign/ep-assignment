@@ -104,10 +104,10 @@ exports.handler = function( event, context ) {
 
 			if (event._POST.guess.initial_rate > current_usd_rate) {
 				// went down
-				coins = event._POST.guess.down === 'down' ? 1 : -1;
+				coins = event._POST.guess.next === 'down' ? 1 : -1;
 			} else {
 				// went up
-				coins = event._POST.guess.down === 'up'   ? 1 : -1;
+				coins = event._POST.guess.next === 'up'   ? 1 : -1;
 			}
 
 
