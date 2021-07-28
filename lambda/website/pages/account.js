@@ -16,7 +16,7 @@ module.exports = function( event, cb ) {
 
 			DynamoDB
 				.table('sessions')
-				.where('id').eq( event._COOKIES.sid )
+				.where('session_id').eq( event._COOKIES.sid )
 				.get()
 				.then(( data ) => {
 					if (!Object.keys(data).length)
@@ -31,7 +31,11 @@ module.exports = function( event, cb ) {
 					cb()
 				})
 				.catch(( err ) => {
-					cb({success: false, errorCode: 'TMP_ERR', })
+					cb({
+						statusCode: 503,
+						contentType: 'text/html',
+						body: "ERROR",
+					})
 				})
 		},
 
