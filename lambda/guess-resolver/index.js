@@ -16,6 +16,7 @@ exports.handler = function( event, context ) {
 	var default_sleep = 60; // 1 minute
 
 	var current_usd_rate;
+	var user;
 
 	async.waterfall([
 
@@ -70,6 +71,31 @@ exports.handler = function( event, context ) {
 		},
 
 
+		// get the user
+		( cb ) => {
+			DynamoDB
+				.table('users')
+				.where('user_id').eq( event._POST.guess.user_id )
+				.get()
+				.then(( data ) => {
+					if (!Object.keys(data).length)
+						return cb({
+							_POST: event._POST,
+							sleep: 60*60*24,
+							end: true, // exit if failed
+						})
+
+					user = data;
+					cb()
+				})
+				.catch((err) => {
+					return cb({
+						_POST: event._POST,
+						sleep: 60*60*24,
+						end: true, // exit if failed
+					})
+				})
+		},
 
 		// rate has changed, resolve and exit
 		( cb ) => {
@@ -91,7 +117,10 @@ exports.handler = function( event, context ) {
 					.table('users')
 						.where('user_id').eq( event._POST.guess.user_id )
 						.if('guess_id').eq(event._POST.guess.guess_id)
-						.update({ guess_id: null })
+						.update({ 
+							guess_id: null,
+							coins: (user.coins || 0) + coins,
+						})
 					.table('guess')
 						.where('user_id').eq( event._POST.guess.user_id )
 						.where('guess_id').eq(event._POST.guess.guess_id)
