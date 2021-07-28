@@ -3,6 +3,9 @@
 
 AWS = require('aws-sdk')
 DynamoDB = require('@awspilot/dynamodb')()
+DynamoDB.schema({ TableName: 'users', KeySchema: [ {AttributeName: 'user_id' } ] })
+DynamoDB.schema({ TableName: 'guess', KeySchema: [ {AttributeName: 'user_id' }, {AttributeName: 'guess_id' } ] })
+
 async = require('async')
 
 
@@ -83,8 +86,35 @@ exports.handler = function( event, context ) {
 
 
 			console.log("got ", points, " points")
+			DynamoDB
+				.transact()
+					.table('users')
+						.where('user_id').eq( event._POST.guess.user_id )
+						.if('guess_id').eq(event._POST.guess.guess_id)
+						.update({ guess_id: null })
+					.table('guess')
+						.where('user_id').eq( event._POST.guess.user_id )
+						.where('guess_id').eq(event._POST.guess.guess_id)
+						.update( {
+							final_rate: current_usd_rate
+						})
+				.write()
+				.then(( data ) => {
+					cb({
+						_POST: event._POST,
+						sleep: 30, // speep 30 seconds
+						end: true, // exit if failed
+					})
+				})
+				.catch((err) => {
+					console.log( err )
+					cb({
+						_POST: event._POST,
+						sleep: 30, // speep 30 seconds
+						end: true, // exit if failed
+					})
+				})
 
-			cb()
 		},
 
 	], function(err) {
