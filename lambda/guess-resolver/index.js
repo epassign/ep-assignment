@@ -91,7 +91,7 @@ exports.handler = function( event, context ) {
 					.table('users')
 						.where('user_id').eq( event._POST.guess.user_id )
 						.if('guess_id').eq(event._POST.guess.guess_id)
-						.update({ guess_id: undefined })
+						.update({ guess_id: null })
 					.table('guess')
 						.where('user_id').eq( event._POST.guess.user_id )
 						.where('guess_id').eq(event._POST.guess.guess_id)
