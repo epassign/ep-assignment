@@ -1,10 +1,14 @@
 
+var AWS      = require("aws-sdk")
+var stepfunctions = new AWS.StepFunctions()
+
 module.exports = function(event, cb) {
 
-console.log("guess", event )
+
 	var session;
 	var user;
 	var new_guess_id = ((new Date().getTime()* 1000) + Math.round(Math.random() * 1000)).toString(16);
+	var guess;
 
 	async.waterfall([
 
@@ -93,6 +97,17 @@ console.log("guess", event )
 
 		// save the guess
 		( cb ) => {
+
+			guess = { 
+				user_id: user.user_id,
+				guess_id: new_guess_id,
+				created_at: new Date().getTime(),
+				next: event._POST.next,
+				currency: 'USD',
+				initial_rate: event._POST.rate,
+				final_rate: null,
+			}
+
 			DynamoDB
 				.transact()
 					.table('users')
@@ -100,15 +115,7 @@ console.log("guess", event )
 						.if('guess_id').not().exists()
 						.update({guess_id: new_guess_id})
 					.table('guess')
-						.insert( { 
-							user_id: user.user_id,
-							guess_id: new_guess_id,
-							created_at: new Date().getTime(),
-							next: event._POST.next,
-							currency: 'USD',
-							initial_rate: event._POST.rate,
-							final_rate: null,
-						} )
+						.insert( guess )
 				.write()
 				.then(( data ) => {
 					cb()
@@ -119,6 +126,26 @@ console.log("guess", event )
 				})
 		},
 
+
+
+		// start process
+		( cb ) => {
+
+			var params = {
+				stateMachineArn: "arn:aws:states:" + process.env.AWS_DEFAULT_REGION + ":" + process.env.AWS_ACCOUNT_ID + ":stateMachine:GuessResolverStepFunction",
+				input: JSON.stringify({
+					'_POST': {
+						guess: guess
+					}
+				}),
+				name: new_guess_id + '@1',
+			}
+
+			stepfunctions.startExecution(params, function(err, data) {
+				console.log('stepfunction:StepDomainCertificate', err, data )
+				cb()
+			});
+		}
 
 	], (err) => {
 		if (err)
