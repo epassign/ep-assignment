@@ -12,8 +12,8 @@ module.exports = function( event, cb ) {
 		<script src="https://${process.env.cdn_master}/ep-assignment.min.js"></script>
 
 
-		<script src="https://cdn.jsdelivr.net/npm/chart.js@3.4.1/dist/chart.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/react-chartjs-2@3.0.4/dist/index.min.js"></script>
+		<script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+
 	</head>
 	<body>
 
