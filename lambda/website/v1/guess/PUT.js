@@ -115,7 +115,7 @@ console.log("guess", event )
 				})
 				.catch((err) => {
 					console.log( err )
-					cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed creating new guess'})
+					cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed creating new guess', debug: err })
 				})
 		},
 
