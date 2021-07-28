@@ -51,7 +51,13 @@ module.exports = function(event, cb) {
 			body: JSON.stringify({
 				success: true,
 				history: {
-					usd: usd_history,
+					usd: 
+						Object.keys(usd_history).map((k) => {
+							return [
+								parseInt(k),
+								usd_history[k]
+							]
+						}),
 					eur: eur_history,
 				},
 			}, null, "\t")
