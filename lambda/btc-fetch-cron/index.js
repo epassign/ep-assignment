@@ -75,8 +75,8 @@ exports.handler = function( event, context , cb ) {
 				try {
 					result = JSON.parse(body)
 
-					rate.eur = Math.round(result.bpi.EUR.rate_float,0 )
-					rate.usd = Math.round(result.bpi.USD.rate_float,0 )
+					rate.eur = Math.round(result.bpi.EUR.rate_float,2 )
+					rate.usd = Math.round(result.bpi.USD.rate_float,2 )
 
 					console.log( "USD", rate.usd )
 					console.log( "EUR", rate.eur )
