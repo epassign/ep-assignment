@@ -74,18 +74,18 @@ exports.handler = function( event, context ) {
 		// rate has changed, resolve and exit
 		( cb ) => {
 
-			var points = 0;
+			var coins = 0;
 
 			if (event._POST.guess.initial_rate > current_usd_rate) {
 				// went down
-				points = event._POST.guess.down === 'down' ? 1 : -1;
+				coins = event._POST.guess.down === 'down' ? 1 : -1;
 			} else {
 				// went up
-				points = event._POST.guess.down === 'up'   ? 1 : -1;
+				coins = event._POST.guess.down === 'up'   ? 1 : -1;
 			}
 
 
-			console.log("got ", points, " points")
+			console.log("got ", coins, " points")
 			DynamoDB
 				.transact()
 					.table('users')
@@ -96,7 +96,8 @@ exports.handler = function( event, context ) {
 						.where('user_id').eq( event._POST.guess.user_id )
 						.where('guess_id').eq(event._POST.guess.guess_id)
 						.update( {
-							final_rate: current_usd_rate
+							final_rate: current_usd_rate,
+							coins,
 						})
 				.write()
 				.then(( data ) => {
