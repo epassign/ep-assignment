@@ -1,9 +1,9 @@
 
-import { waterfall } from 'async';
-
 var bcrypt = require('bcryptjs');
 
 module.exports = function(event, cb) {
+
+	import { waterfall } from 'async';
 
 	var username = (event._POST.username || '').toLowerCase()
 	var session_id = 'xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxy'.replace(/[xy]/g, function(c) { var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8); return v.toString(16); })
