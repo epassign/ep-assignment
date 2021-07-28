@@ -394,7 +394,93 @@ Resources:
                 IPV6Enabled: true
                 PriceClass: PriceClass_All
 
+    DbUsers:
+        Type: AWS::DynamoDB::Table
+        #DeletionPolicy: Retain
+        Properties:
+            TableName: users
+            BillingMode: PAY_PER_REQUEST
+            StreamSpecification: { StreamViewType: NEW_AND_OLD_IMAGES }
+            AttributeDefinitions:
+                -
+                  AttributeName: user_id
+                  AttributeType: S
+                -
+                  AttributeName: username
+                  AttributeType: S
+            KeySchema:
+                -
+                  AttributeName: user_id
+                  KeyType: HASH
+            GlobalSecondaryIndexes:
+                -
+                  IndexName: username-index
+                  Projection:
+                     ProjectionType: INCLUDE
+                     NonKeyAttributes:
+                        - password
+                        - pending_delete
+                  KeySchema:
+                    -
+                        AttributeName: username
+                        KeyType: HASH
 
+    DbSessions:
+        Type: AWS::DynamoDB::Table
+        #DeletionPolicy: Retain
+        Properties:
+            TableName: sessions
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                -
+                  AttributeName: session_id
+                  AttributeType: S
+                -
+                  AttributeName: user_id
+                  AttributeType: S
+                -
+                  AttributeName: created_at
+                  AttributeType: N
+
+            KeySchema:
+                -
+                  AttributeName: session_id
+                  KeyType: HASH
+
+            GlobalSecondaryIndexes:
+                -
+                  IndexName: user_id-index
+                  Projection:
+                     ProjectionType: ALL
+                  KeySchema:
+                    -
+                        AttributeName: user_id
+                        KeyType: HASH
+                    -
+                        AttributeName: created_at
+                        KeyType: RANGE
+
+    DbBTCHistory:
+        Type: AWS::DynamoDB::Table
+        #DeletionPolicy: Retain
+        Properties:
+            TableName: btc_history
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                -
+                  AttributeName: all
+                  AttributeType: N
+                -
+                  AttributeName: minute
+                  AttributeType: S
+
+            KeySchema:
+                -
+                  AttributeName: all
+                  KeyType: HASH
+                -
+                  AttributeName: minute
+                  KeyType: RANGE
 
 
 
@@ -549,11 +635,51 @@ Resources:
     #             HostedZoneId: !GetAtt WebsiteDomain.RegionalHostedZoneId
 
 
+    DecoyBtcFetch:
+        Type: Custom::S3Zip
+        DependsOn: [ S3OnDemand, DeployBucket ]
+        Properties:
+            ServiceToken: !GetAtt S3OnDemand.Arn
+            id: btc-fetch-cron
+            Bucket: !Ref DeployBucketName
+            Key: btc-fetch-cron.zip
 
+    BtcFetchLambdaFunction:
+        Type: AWS::Lambda::Function
+        DependsOn: [ DecoyBtcFetch, DeployBucket ]
+        Properties:
+            FunctionName: btc-fetch-cron
+            MemorySize: 128
+            Handler: index.handler
+            Role: !GetAtt WebsiteLambdaRole.Arn
+            Runtime: !Ref WebsiteLambdaNodeVersion
+            Timeout: 20
+            Layers:
+               - !Sub "arn:aws:lambda:${AWS::Region}:452980636694:layer:awspilot-dynamodb-2_0_0:1"
+            Code:
+                S3Bucket: !Ref DeployBucketName
+                S3Key: btc-fetch-cron.zip
 
-
-
-
+    BtcFetchCron:
+        Type: AWS::Events::Rule
+        DependsOn: [ BtcFetchLambdaFunction ]
+        Properties:
+            Description: Cron that fetches and saves BTC rate 
+            ScheduleExpression: rate(1 minute)
+            Name: cron-btc-history
+            Targets:
+              - Arn: !GetAtt BtcFetchLambdaFunction.Arn
+                Id: BtcFetchLambdaFunction
+                Input: '{}'
+    
+    PermissionForEventsToInvokeLambda:
+      Type: AWS::Lambda::Permission
+      DependsOn: [ BtcFetchCron ]
+      Properties:
+        FunctionName: !Ref BtcFetchLambdaFunction
+        Action: lambda:InvokeFunction
+        Principal: events.amazonaws.com
+        SourceArn: !GetAtt BtcFetchCron.Arn
 
 
 Outputs:
