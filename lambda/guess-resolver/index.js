@@ -75,10 +75,10 @@ exports.handler = function( event, context ) {
 
 			if (event._POST.guess.initial_rate > current_usd_rate) {
 				// went down
-				points = event._POST.guest.down === 'down' ? 1 : -1;
+				points = event._POST.guess.down === 'down' ? 1 : -1;
 			} else {
 				// went up
-				points = event._POST.guest.down === 'up'   ? 1 : -1;
+				points = event._POST.guess.down === 'up'   ? 1 : -1;
 			}
 
 
