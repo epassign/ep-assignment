@@ -37,7 +37,7 @@ module.exports = function( event, cb ) {
 
 	], (err) => {
 		if (err)
-			return (err)
+			return cb(err)
 
 		cb({
 			statusCode: 200,
