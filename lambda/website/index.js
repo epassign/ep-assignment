@@ -9,7 +9,6 @@ const payloader = require('./payload');
 
 const aliases = {
 	'/': '/index',
-	'/account': '/index',
 }
 
 exports.handler = function( event, context, cb ) {
