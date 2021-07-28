@@ -1,5 +1,10 @@
-
+// globals
 fs    = require('fs')
+bcrypt = require('bcryptjs');
+async = require('async');
+DynamoDB = require('@awspilot/dynamodb')()
+
+
 const payloader = require('./payload');
 
 const aliases = {
