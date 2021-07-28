@@ -23,7 +23,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch((err) => {
-					cb({success: false, errorCode: 'TMP_ERR', debug: err })
+					cb({success: false, errorCode: 'TMP_ERR',})
 				})
 		},
 
@@ -68,7 +68,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch((err) => {
-					cb({success: false, errorCode: 'SIGNUP_FAILED', debug: err })
+					cb({success: false, errorCode: 'SIGNUP_FAILED', errorMessages: 'Signup failed' })
 				})
 		},
 
@@ -85,7 +85,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch((err) => {
-					cb({ success:false, errorCode: 'TMP_ERR', errorMessages: 'Failed creating session', debug: err })
+					cb({ success:false, errorCode: 'TMP_ERR', errorMessages: 'Failed creating session'})
 				})
 		}
 
