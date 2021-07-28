@@ -58,6 +58,9 @@ module.exports = function(event, cb) {
 				created_at: new Date().getTime(),
 				// status: 'UNVERIFIED',
 
+				guess_id: null,
+				coins: 0,
+
 			}
 
 			DynamoDB
