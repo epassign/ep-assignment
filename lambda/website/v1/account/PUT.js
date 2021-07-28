@@ -99,6 +99,7 @@ module.exports = function(event, cb) {
 			body: JSON.stringify({
 				success: true,
 				user_id: new_user_id,
+				session_id,
 			}, null, "\t")
 		})
 	})
