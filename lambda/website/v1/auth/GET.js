@@ -4,6 +4,7 @@ module.exports = function(event, cb) {
 
 	var session;
 	var user;
+	var guess;
 
 	async.waterfall([
 
@@ -49,7 +50,29 @@ module.exports = function(event, cb) {
 		},
 
 
+		// get user's current guess
+		( cb ) => {
 
+			if ( !user.guess_id ) 
+				return cb()
+
+			DynamoDB
+				.table('guess')
+				.where('user_id').eq( session.user_id )
+				.where('guess_id').eq( user.guess_id )
+				.get()
+				.then(( data ) => {
+					if (!Object.keys(data).length)
+						return cb({success: false, errorCode: 'NOT_FOUND',}) // guess not found but linked to the user, maybe delete it from user
+
+					guess = data
+
+					cb()
+				})
+				.catch((err) => {
+					cb({success: false, errorCode: 'TMP_ERR',})
+				})
+		},
 
 
 	], (err) => {
@@ -67,6 +90,7 @@ module.exports = function(event, cb) {
 					name: user.name,
 					avatar: 'https://i.imgur.com/C4egmYM.jpg',
 				},
+				guess,
 			}, null, "\t")
 		})
 	})
