@@ -53,7 +53,7 @@ console.log("guess", event )
 						return cb({success: false, errorCode: 'USER_NOT_FOUND', errorMessage: 'Failed getting your session' })
 
 
-					if (user.hasOwnProperty('guess_id') )
+					if (data.hasOwnProperty('guess_id') )
 						return cb({success: false, errorCode: 'USER_NOT_FOUND', errorMessage: 'Another guess in progress' })
 
 					user = data
@@ -92,31 +92,31 @@ console.log("guess", event )
 
 
 		// save the guess
-		// ( cb ) => {
-		// 	DynamoDB
-		// 		.transact()
-		// 			.table('users')
-		// 				.where('user_id').eq( user.user_id )
-		// 				.if('guess_id').not_exists()
-		// 				.update({guess_id: new_guess_id})
-		// 			.table('guess')
-		// 				.insert( { 
-		// 					user_id: user.user_id,
-		// 					guess_id: new_guess_id,
-		// 					created_at: new Date().getTime(),
-		// 					next: this._POST.next,
-		// 					currency: 'USD',
-		// 					initial_rate: event._POST.rate,
-		// 					final_rate: null,
-		// 				} )
-		// 		.write()
-		// 		.then(( data ) => {
-		// 			cb()
-		// 		})
-		// 		.catch((err) => {
-		// 			cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed creating new guess'})
-		// 		})
-		// },
+		( cb ) => {
+			DynamoDB
+				.transact()
+					.table('users')
+						.where('user_id').eq( user.user_id )
+						.if('guess_id').not_exists()
+						.update({guess_id: new_guess_id})
+					.table('guess')
+						.insert( { 
+							user_id: user.user_id,
+							guess_id: new_guess_id,
+							created_at: new Date().getTime(),
+							next: this._POST.next,
+							currency: 'USD',
+							initial_rate: event._POST.rate,
+							final_rate: null,
+						} )
+				.write()
+				.then(( data ) => {
+					cb()
+				})
+				.catch((err) => {
+					cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed creating new guess'})
+				})
+		},
 
 
 	], (err) => {
