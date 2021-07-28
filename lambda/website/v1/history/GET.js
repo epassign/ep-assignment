@@ -1,16 +1,11 @@
 
 module.exports = function(event, cb) {
 
-
-
-
-	//var history = [];
-
 	var usd_history = {}
-
 	var eur_history = {}
-	for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date().getTime(); start+=1000*30 ) {
-		eur_history[ new Date(new Date(start).toISOString().slice(0,16) + ':00.00Z').getTime() ] = 0
+	var current = {
+		usd: null,
+		eur: null,
 	}
 
 	var raw;
@@ -27,8 +22,17 @@ module.exports = function(event, cb) {
 
 					raw = data;
 
+					if (data.length) {
+						current.usd = data[0].usd
+						current.eur = data[0].eur
+					}
+
 					for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date( data[0].minute + ':00.00Z' ).getTime(); start+=1000*30 ) {
 						usd_history[ new Date(new Date(start).toISOString().slice(0,16) + ':00.00Z').getTime() ] = 0
+					}
+
+					for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date( data[0].minute + ':00.00Z' ).getTime(); start+=1000*30 ) {
+						eur_history[ new Date(new Date(start).toISOString().slice(0,16) + ':00.00Z').getTime() ] = 0
 					}
 
 					//history = data
@@ -63,8 +67,15 @@ module.exports = function(event, cb) {
 								usd_history[k]
 							]
 						}),
-					eur: eur_history,
+					eur:
+						Object.keys( eur_history).map((k) => {
+							return [
+								parseInt(k),
+								eur_history[k]
+							]
+						}),
 				},
+				current,
 				raw,
 			}, null, "\t")
 		})
