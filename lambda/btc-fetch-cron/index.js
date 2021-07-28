@@ -17,7 +17,7 @@ exports.handler = function( event, context , cb ) {
 
 		// get the rate from external api
 		( cb ) => {
-			var url = "https://blockchain.info/ticker";
+			var url = "https://blockchain.info/ticker?cors=true"; // stopped working w/o ?cors=true
 
 			request(url, function (err, response, body) {
 				console.log(err ? '☐' : '☑', "request ", url, err )
