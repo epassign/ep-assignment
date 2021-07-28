@@ -17,7 +17,7 @@ exports.handler = function( event, context , cb ) {
 
 		// get the rate from external api
 		( cb ) => {
-			var url = "https://blockchain.info/ticker?cors=true"; // stopped working w/o ?cors=true
+			var url = "https://blockchain.info/ticker";
 
 			request(url, function (err, response, body) {
 				console.log(err ? '☐' : '☑', "request ", url, err )
@@ -49,6 +49,48 @@ exports.handler = function( event, context , cb ) {
 				cb()
 			});
 		},
+
+
+		// fallback to a second solution
+		( cb ) => {
+
+			if ( rate.usd )
+				return cb() // skip it...
+
+			var url = "https://api.coindesk.com/v1/bpi/currentprice.json"; 
+
+			request(url, function (err, response, body) {
+				console.log(err ? '☐' : '☑', "request ", url, err )
+				if (err)
+					return cb()
+
+				if ( response.statusCode !== 200 )
+					return console.log("response.statusCode", response.statusCode ) || cb()
+
+
+				if ( typeof body !== "string")
+					return cb()
+
+				var result;
+				try {
+					result = JSON.parse(body)
+
+					rate.eur = result.bpi.EUR.rate_float
+					rate.usd = result.bpi.USD.rate_float
+
+					console.log( "USD", result.USD.last )
+					console.log( "EUR", result.EUR.last )
+
+				} catch (err) {
+					console.log("parse",err)
+				}
+
+
+				cb()
+			});
+		},
+		
+
 
 
 		// save the rate in our db
