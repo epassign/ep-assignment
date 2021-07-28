@@ -21,7 +21,7 @@ module.exports = function(event, cb) {
 		( cb ) => {
 
 			if (!event._COOKIES.sid)
-				return cb({ success: false, })
+				return cb({ success: false, errorMessage: 'You must be logged in' })
 
 			DynamoDB
 				.table('sessions')
