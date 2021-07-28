@@ -8,7 +8,7 @@ module.exports = function(event, cb) {
 		eur: null,
 	}
 
-	var raw;
+	//var raw;
 	async.waterfall([
 
 		( cb ) => {
@@ -20,7 +20,7 @@ module.exports = function(event, cb) {
 				.query()
 				.then(( data ) => {
 
-					raw = data;
+					//raw = data;
 
 					if (data.length) {
 						current.usd = data[0].usd
@@ -66,17 +66,17 @@ module.exports = function(event, cb) {
 								parseInt(k),
 								usd_history[k]
 							]
-						}),
+						}).slice(-60),
 					eur:
 						Object.keys( eur_history).map((k) => {
 							return [
 								parseInt(k),
 								eur_history[k]
 							]
-						}),
+						}).slice(-60),
 				},
 				current,
-				raw,
+				//raw,
 			}, null, "\t")
 		})
 	})
