@@ -142,7 +142,7 @@ module.exports = function(event, cb) {
 			}
 
 			stepfunctions.startExecution(params, function(err, data) {
-				console.log('stepfunction:StepDomainCertificate', err, data )
+				console.log('stepfunction:GuessResolverStepFunction', err, data )
 				cb()
 			});
 		}
