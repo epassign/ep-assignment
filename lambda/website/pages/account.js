@@ -5,6 +5,15 @@ module.exports = function( event, cb ) {
 
 		// check session, redirect if not logged in
 		( cb ) => {
+
+			if (!event._COOKIES.sid)
+				return cb({
+					statusCode: 302,
+					contentType: 'text/html',
+					location: err.location || '/login',
+					body: "<a href='/login'>Continue to Login</a>",
+				})
+
 			DynamoDB
 				.table('sessions')
 				.where('id').eq( event._COOKIES.sid )
