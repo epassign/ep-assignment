@@ -10,7 +10,7 @@ module.exports = function( event, cb ) {
 				return cb({
 					statusCode: 302,
 					contentType: 'text/html',
-					location: err.location || '/login',
+					location: '/login',
 					body: "<a href='/login'>Continue to Login</a>",
 				})
 
@@ -23,7 +23,7 @@ module.exports = function( event, cb ) {
 						return cb({
 							statusCode: 302,
 							contentType: 'text/html',
-							location: err.location || '/login',
+							location: '/login',
 							body: "<a href='/login'>Continue to Login</a>",
 						})
 
