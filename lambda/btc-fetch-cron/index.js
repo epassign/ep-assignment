@@ -14,6 +14,7 @@ exports.handler = function( event, context , cb ) {
 
 	async.waterfall([
 
+		// get the rate from external api
 		( cb ) => {
 			var url = "https://blockchain.info/ticker";
 
@@ -50,6 +51,19 @@ exports.handler = function( event, context , cb ) {
 			});
 		},
 
+
+		// save the rate in our db
+		( cb ) => {
+			DynamoDB
+				.table('btc_history')
+				.insert_ur_update({
+					all: 1,
+					min: new Date().toISOString().split('T').join(' ').slice(0,16),
+
+					eur: rate.eur,
+					usd: rate.usd,
+				})
+		}
 
 	], function() {
 
