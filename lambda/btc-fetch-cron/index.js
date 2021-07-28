@@ -59,7 +59,7 @@ exports.handler = function( event, context , cb ) {
 				.table('btc_history')
 				.insert_or_update({
 					all: 1,
-					min: new Date().toISOString().split('T').join(' ').slice(0,16),
+					minute: new Date().toISOString().split('T').join(' ').slice(0,16),
 
 					eur: rate.eur,
 					usd: rate.usd,
