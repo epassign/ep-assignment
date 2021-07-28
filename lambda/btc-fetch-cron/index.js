@@ -57,7 +57,7 @@ exports.handler = function( event, context , cb ) {
 		( cb ) => {
 			DynamoDB
 				.table('btc_history')
-				.insert_ur_update({
+				.insert_or_update({
 					all: 1,
 					min: new Date().toISOString().split('T').join(' ').slice(0,16),
 
