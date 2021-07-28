@@ -97,7 +97,7 @@ console.log("guess", event )
 				.transact()
 					.table('users')
 						.where('user_id').eq( user.user_id )
-						.if('guess_id').not_exists()
+						.if('guess_id').not().exists()
 						.update({guess_id: new_guess_id})
 					.table('guess')
 						.insert( { 
@@ -114,6 +114,7 @@ console.log("guess", event )
 					cb()
 				})
 				.catch((err) => {
+					console.log( err )
 					cb({success: false, errorCode: 'TMP_ERR', errorMessage: 'Failed creating new guess'})
 				})
 		},
