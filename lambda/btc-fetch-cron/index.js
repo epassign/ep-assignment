@@ -2,6 +2,7 @@ AWS           = require('aws-sdk');
 //cloudwatch    = new AWS.CloudWatch();
 const request = require('request');
 async         = require('async');
+DynamoDB = require('@awspilot/dynamodb')()
 
 exports.handler = function( event, context , cb ) {
 
