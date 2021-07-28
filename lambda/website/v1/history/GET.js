@@ -7,14 +7,13 @@ module.exports = function(event, cb) {
 	//var history = [];
 
 	var usd_history = {}
-	for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date().getTime(); start+=1000*30 ) {
-		usd_history[ new Date(new Date(start).toISOString().slice(0,16) + ':00.00Z').getTime() ] = 0
-	}
+
 	var eur_history = {}
 	for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date().getTime(); start+=1000*30 ) {
 		eur_history[ new Date(new Date(start).toISOString().slice(0,16) + ':00.00Z').getTime() ] = 0
 	}
 
+	var raw;
 	async.waterfall([
 
 		( cb ) => {
@@ -25,6 +24,12 @@ module.exports = function(event, cb) {
 				.limit(60)
 				.query()
 				.then(( data ) => {
+
+					raw = data;
+
+					for (let start = new Date().getTime() - (1000 * 60*60 ); start <= new Date().getTime(); start+=1000*30 ) {
+						usd_history[ new Date(new Date(start).toISOString().slice(0,16) + ':00.00Z').getTime() ] = 0
+					}
 
 					//history = data
 					data.map( ( d ) => {
@@ -60,6 +65,7 @@ module.exports = function(event, cb) {
 						}),
 					eur: eur_history,
 				},
+				raw,
 			}, null, "\t")
 		})
 	})
