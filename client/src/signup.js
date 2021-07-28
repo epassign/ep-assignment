@@ -23,7 +23,7 @@ class Signup extends React.Component {
 				return this.setState({ err: err.errorMessage || err.errorCode })
 
 			// save cookie and redirect
-			Cookies.set('asid', data.session_id, { path: '/', expires: 30 });
+			Cookies.set('sid', data.session_id, { path: '/', expires: 30 });
 			location.href = "/account"
 
 		})
