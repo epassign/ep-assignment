@@ -38,8 +38,8 @@ exports.handler = function( event, context , cb ) {
 					rate.eur = result.EUR.last
 					rate.usd = result.USD.last
 
-					console.log( "USD", result.USD.last )
-					console.log( "EUR", result.EUR.last )
+					console.log( "USD", rate.usd )
+					console.log( "EUR", rate.eur  )
 
 				} catch (err) {
 					console.log("parse",err)
