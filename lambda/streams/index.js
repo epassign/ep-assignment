@@ -9,6 +9,15 @@ async = require("async")
 dynamodb_util = require('@awspilot/dynamodb-util')
 DynamoDB = require('@awspilot/dynamodb')()
 
+var Pusher = require('pusher')
+pusher = new Pusher({
+	appId: process.env.pusher_appId,
+	key: process.env.pusher_key,
+	secret: process.env.pusher_secret,
+	cluster: process.env.pusher_cluster,
+	encrypted: true
+})
+
 exports.handler = function( event, context, cb ) {
 	async.each(event.Records, function(record, cb) {
 
