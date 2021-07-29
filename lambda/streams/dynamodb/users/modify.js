@@ -29,6 +29,18 @@ module.exports = function(record, cb ) {
 			cb()
 		},
 
+		(cb) => {
+			if ( rec.guess_id === old_rec.guess_id )
+				return cb() // skip
+
+			console.log("Pusher user_id=", rec.user_id, " channel=", _realtime_get_channel( rec.user_id )  )
+
+			pusher.trigger(_realtime_get_channel( rec.user_id ) , 'guess', {
+				guess_id: rec.guess_id
+			})
+
+			cb()
+		},
 
 	], function(err) {
 		cb(err)
