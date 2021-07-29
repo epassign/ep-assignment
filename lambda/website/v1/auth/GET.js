@@ -30,7 +30,7 @@ module.exports = function(event, cb) {
 				})
 		},
 
-
+		// step 2, get user
 		( cb ) => {
 			DynamoDB
 				.table('users')
@@ -53,7 +53,7 @@ module.exports = function(event, cb) {
 		// get user's current guess
 		( cb ) => {
 
-			if ( !user.guess_id ) 
+			if ( user.guess_id === null ) 
 				return cb()
 
 			DynamoDB
