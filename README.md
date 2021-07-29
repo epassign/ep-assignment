@@ -1,20 +1,37 @@
 # ep-assignment
 
-EP-assesment serverless is built using the following AWS technologies
 
->  
+
+
+> Build a web app that allows users to make guesses on whether the market price of Bitcoin (BTC/USD) will be higher or lower after one minute.  
 > 
+> Rules:  
+> - The player can at all times see their current score and the latest available BTC price in USD  
+> - The player can choose to enter a guess of either “up” or “down“  
+> - After a guess is entered the player cannot make new guesses until the existing guess is resolved  
+> - The guess is resolved when the price changes and at least 60 seconds have passed since the guess was made  
+> - If the guess is correct (up = price went higher, down = price went lower), the user gets 1 point added to their score. If the guess is incorrect, the user loses 1 point.  
+> - Players can only make one guess at a time  
+> - New players start with a score of 0  
+> Solution requirements:  
+> - The guesses should be resolved fairly using BTC price data from any available 3rd party API  
+> - The score of each player should be persisted in a backend data store (AWS services preferred)  
+> - Optional: Players should be able to close their browser and return back to see their score and continue to make more guesses  
 
 
+#### Implementation
+
+Implementation build using  AWS technologies and is 100% serverless ( no EC2 instances )
 
 Frontend
 - React 
 - Bootstrap 5 ( for quick UI )
 - ReactApexCharts 
 - - used to display BTC rate chart 
-- - unfortunately adds a significant 500+ KB to the bundle 
+- - :warning: unfortunately apexcharts adds a significant 500+ KB uncompressed to the bundle :warning: 
 - webpack 
 - - builds a bundle for the frontend that is later uploaded to S3
+- - bundle without apexcharts is around 40KB uncompressed
 
 
 Backend
@@ -32,7 +49,7 @@ Backend
 - - - on .zip upload it updates the lambda function corresponding to that function 
 - Cloudfront
 - - serves static content from S3 bucket
-- - :warning: :warning: :warning: is configured not to cache for this project, it forwards every request to S3 endpoint
+- - :warning: is configured not to cache for this project, it forwards every request to S3 endpoint :warning: 
 
 - Lambda 
 - - dependencies
