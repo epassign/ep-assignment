@@ -8,6 +8,7 @@ class BTCChart extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			currency: 'USD',
 			current: {
 				usd: null,
 				eur: null,
@@ -30,11 +31,17 @@ class BTCChart extends React.Component {
 				},
 
 			},
-			chart_series: [
+			usd_chart_series: [
 				{
 					data: []
 				}
 			],
+			eur_chart_series: [
+				{
+					data: []
+				}
+			],
+
 		}
 	}
 
@@ -44,9 +51,14 @@ class BTCChart extends React.Component {
 				return;
 
 			this.setState({
-				chart_series: [
+				usd_chart_series: [
 					{
 						data: data.history.usd
+					}
+				],
+				eur_chart_series: [
+					{
+						data: data.history.eur
 					}
 				],
 				current: data.current,
@@ -58,7 +70,15 @@ class BTCChart extends React.Component {
 		return (
 			<div class="card">
 				<div class="card-header">
-					BTC/USD
+
+					BTC/{this.state.currency}
+
+					<div class="btn-group btn-group-sm float-end">
+						<button class={"btn " + ( this.state.currency === "USD" ? "btn-primary" : "btn-outline-primary")} onClick={() => this.setState({ currency: 'USD'})}>USD</button>
+						<button class={"btn " + ( this.state.currency === "EUR" ? "btn-primary" : "btn-outline-primary")} onClick={() => this.setState({ currency: 'EUR'})}>EUR</button>
+					</div>
+
+
 				</div>
 				<div class="card-body" style={{ position: 'relative', height: 350, }}>
 
@@ -67,7 +87,12 @@ class BTCChart extends React.Component {
 							type="area"
 							height={300}
 							options={this.state.chart_options}
-							series={this.state.chart_series}
+							series={
+								this.state.currency === 'USD' ?
+								this.state.usd_chart_series
+								:
+								this.state.eur_chart_series
+							}
 						/>
 
 					</div>
