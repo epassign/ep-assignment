@@ -24,7 +24,8 @@ REALTIME_HASH = '2557806818'
 _realtime_get_channel = function( subject ) {
 	return crypto.createHash('md5').update( REALTIME_HASH + '/'+ subject ).digest("hex")
 }
-
+// random channel id to broadcast btc rate changes
+global_realtime_channel = '367544a50c6f7d9b454fbc14114833d7'
 
 exports.handler = function( event, context, cb ) {
 	async.each(event.Records, function(record, cb) {
