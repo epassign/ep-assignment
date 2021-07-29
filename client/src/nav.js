@@ -52,11 +52,18 @@ class Nav extends React.Component {
 						<div class="dropdown">
 							<button 
 								class="btn btn-sm btn-primary dropdown-toggle" 
-								style={{minWidth: 150,	textAlign: 'left', }} 
+								style={{minWidth: 100,	textAlign: 'left', }} 
 								onBlur={ () => this.setState({menu_open: false}) }
 								onClick={ () => this.setState({menu_open: !this.state.menu_open}) }
 							>
-								<img src={this.props.auth.avatar} class="rounded-circle" width="30" /> {this.props.auth.name}
+								<img src={this.props.auth.avatar} class="rounded-circle" width="20" /> 
+								{this.props.auth.name}
+
+
+								<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+									{this.props.auth.coins}
+								</span>
+
 							</button>
 							<ul class={ "dropdown-menu dropdown-menu-dark dropdown-menu-end" + (this.state.menu_open ? ' show' : '') } aria-labelledby="dropdownMenuLink">
 								<li><Link class="dropdown-item" onMouseDown={this.account}>My Account</Link></li>
