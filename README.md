@@ -15,11 +15,13 @@ Backend
 - Step Functions
 - Api Gateway 
 - DynamoDB
+- Cloudwatch Events 
 
 Tasks
 - Cron fetch BTC rate every minute 
 - - collects both USD and EUR rates
-- - uses 2 API providers, if API1 fails will retry with API2
+- - uses 2 API providers, if `blockchain.info` fails will retry with `api.coindesk.com` 
+- - runs once every minute ( minim for cloudwatch events and also APIS update rates every minute too )
 - - save it to **DynamoDB** ~~Cloudwatch Metrics~~  ~~AWS Timestream~~ 
 - Guess resolver runs for every guess
 - - uses **Step Functions** (more precise) instead of ~~SQS~~ (cheaper)
