@@ -88,6 +88,7 @@ module.exports = function(event, cb) {
 					user_id: user.user_id,
 					username: user.username,
 					name: user.name,
+					coins: user.coins,
 					avatar: 'https://i.imgur.com/C4egmYM.jpg',
 				},
 				guess,
