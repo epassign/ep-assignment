@@ -6,6 +6,7 @@ const event_types = {
 
 AWS      = require("aws-sdk")
 async = require("async")
+crypto = require('crypto')
 dynamodb_util = require('@awspilot/dynamodb-util')
 DynamoDB = require('@awspilot/dynamodb')()
 
