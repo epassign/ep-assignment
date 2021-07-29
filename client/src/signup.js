@@ -27,7 +27,7 @@ class Signup extends React.Component {
 
 			// save cookie and redirect
 			Cookies.set('sid', data.session_id, { path: '/', expires: 30 });
-			location.href = "/account"
+			location.href = "/"
 
 		})
 	}
