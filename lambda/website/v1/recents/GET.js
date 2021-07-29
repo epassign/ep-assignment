@@ -36,7 +36,7 @@ module.exports = function(event, cb) {
 
 			db.read(( err, data ) => {
 				if (err)
-					return cb({success: false, errorCode: 'TMP_ERR',})
+					return cb({success: false, errorCode: 'TMP_ERR', debug: err })
 
 				recents = recents.map(function(r) {
 
