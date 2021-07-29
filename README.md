@@ -30,3 +30,33 @@ Tasks
 - - - unlocks user from Guessing again when current guess is resolved
 - - - updates the guess ( there's a record for each guess )
 - - ~~exit and terminate guess if btc rate did not change (might be problem with BTC API)~~ protection mechanism
+
+Pages
+- [x] home page
+- - btc price chart
+- - leaderboard
+- - recent guesses
+- - guess component
+- [x] signup
+- - capitalize first letter in each workd for "Full Name"
+- - auto lowercase for username
+- - server validated name, username, password
+- - form submits on ENTER key
+- - form navigable by tabs ?
+- - ~~clientside validation~~
+- - ~~disabled form after submit~~
+- - ~~form show loading~~
+
+- [x] login
+- - auto lowercase for username
+- - form submits on ENTER key
+- - ~~disabled form after submit~~
+- - ~~form show loading~~
+
+- [x] my account 
+- - btc price chart
+- - user's recent guesses 
+- - guess component
+
+- [ ] user's page
+- - ~~accesible on /@username~~
