@@ -97,7 +97,7 @@ class BTCChart extends React.Component {
 
 					</div>
 
-					<div style={{position: 'absolute', top: 15, right: 15, height: 300, width: 300, border: '1px solid #ccc' }}>
+					<div style={{position: 'absolute', top: 15, right: 15, height: 300, width: 300, }}>
 
 						<Guess auth={this.props.auth} current={this.state.current} guess={this.props.guess} />
 
