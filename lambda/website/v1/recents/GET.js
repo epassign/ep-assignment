@@ -35,7 +35,7 @@ module.exports = function(event, cb) {
 				unique_users[ r.user_id] = 1;
 			})
 
-console.log(unique_users) 
+console.log("unique_users=", unique_users) 
 
 			if (Object.keys(unique_users).length)
 				return cb()
@@ -48,7 +48,7 @@ console.log(unique_users)
 				if (err)
 					return cb({success: false, errorCode: 'TMP_ERR', debug: err })
 
-console.log(data) 
+console.log("data=",data) 
 
 				recents = recents.map(function(r) {
 
