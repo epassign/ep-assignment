@@ -48,12 +48,12 @@ class Signup extends React.Component {
 										<h6 class="mb-4 text-center">Already have an account ? <a href="/login">Login</a></h6>
 
 										<div class="form-outline mb-3">
-											<label class="form-label" for="name">Name</label>
-											<input type="text" id="name" class="form-control form-control-md" value={this.state.name} onChange={(e) => this.setState({ name: e.target.value }) } />
+											<label class="form-label" for="name">Full Name</label>
+											<input type="text" id="name" class="form-control form-control-md" value={this.state.name} onChange={(e) => this.setState({ name: e.target.value }) } style={{ textTransform: 'capitalize' }} />
 										</div>
 
 										<div class="form-outline mb-3">
-											<label class="form-label" for="username">Username</label>
+											<label class="form-label" for="username">Desired Username</label>
 											<input type="text" id="username" class="form-control form-control-md" value={this.state.username} onChange={(e) => this.setState({ username: e.target.value }) } style={{ textTransform: 'lowercase' }} />
 										</div>
 
