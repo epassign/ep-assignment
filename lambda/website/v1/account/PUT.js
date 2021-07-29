@@ -30,7 +30,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch((err) => {
-					cb({success: false, errorCode: 'TMP_ERR',})
+					cb({success: false, errorCode: 'TMP_USER_ERR',})
 				})
 		},
 
@@ -87,15 +87,15 @@ module.exports = function(event, cb) {
 			DynamoDB
 				.table('sessions')
 				.insert_or_replace({
-					session_id:  session_id,
-					user_id: event._POST.user_id,
+					session_id: session_id,
+					user_id: new_user_id,
 					created_at: new Date().getTime(),
 				})
 				.then(() => {
 					cb()
 				})
 				.catch((err) => {
-					cb({ success:false, errorCode: 'TMP_ERR', errorMessages: 'Failed creating session'})
+					cb({ success:false, errorCode: 'TMP_SESSION_ERR', errorMessages: 'Failed creating session'})
 				})
 		}
 
