@@ -42,11 +42,22 @@ Backend
 - - All resources used in this project are defined in Cloudformation template, see `cloudformation` folder 
 - - Exports IAM Key/Secret used for GithubActions ( Github to S3) and to sync bundle to S3
 
+- IAM
+- - IAM user for GithubActions with permissions to putObject on deployment bucket
+- - IAM user for syncing static resources to s3
+- - IAM roles created for Lambda functions ( access to step functions and dynamodb )
+- - IAM roles for in-between AWS services access
+- - - Api Gateway to execute lambda functions ( for HTTP API )
+- - - S3 to execute lambda on new .zip upload 
+- - - DynamoDB streams to execute lambda on items add/update/remove
+- - - CloudWatch events to execute lambda ( btc rate cron )
+
 - S3 
 - - bucket for static resources
 - - - mainly used to store static images, javascript and css bundle ( used together wit Cloudfront )
 - - bucket for lambda zip artifacts
 - - - on .zip upload it updates the lambda function corresponding to that function 
+
 - Cloudfront
 - - serves static content from S3 bucket
 - - :warning: is configured not to cache for this project, it forwards every request to S3 endpoint :warning: 
