@@ -1,5 +1,25 @@
 AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Pusher"
+        Parameters:
+          - PusherAppId
+          - PusherKey
+          - PusherSecret
+          - PusherCluster
 Parameters:
+
+    PusherAppId:
+        Type: String
+    PusherKey:
+        Type: String
+    PusherSecret:
+        Type: String
+    PusherCluster:
+        Type: String
 
     DeployBucketName:
         Type: String
@@ -483,6 +503,7 @@ Resources:
         Properties:
             TableName: btc_history
             BillingMode: PAY_PER_REQUEST
+            StreamSpecification: { StreamViewType: NEW_AND_OLD_IMAGES }
             AttributeDefinitions:
                 -
                   AttributeName: all
@@ -505,6 +526,7 @@ Resources:
         Properties:
             TableName: guess
             BillingMode: PAY_PER_REQUEST
+            StreamSpecification: { StreamViewType: NEW_AND_OLD_IMAGES }
             AttributeDefinitions:
                 -
                   AttributeName: user_id
@@ -645,6 +667,11 @@ Resources:
                     cdn_master:  !GetAtt CDN.DomainName
                     #cdn_staging: !GetAtt CDNDEV.DomainName
                     AWS_ACCOUNT_ID: !Ref AWS::AccountId
+
+                    pusher_appId: !Ref PusherAppId
+                    pusher_key: !Ref PusherKey
+                    pusher_secret: !Ref PusherSecret
+                    pusher_cluster: !Ref PusherCluster
             Code:
                 S3Bucket: !Ref DeployBucketName
                 S3Key: website.zip
@@ -739,6 +766,102 @@ Resources:
         Action: lambda:InvokeFunction
         Principal: events.amazonaws.com
         SourceArn: !GetAtt BtcFetchCron.Arn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    StreamsLog:
+        Type: AWS::Logs::LogGroup
+        Properties:
+          LogGroupName: /aws/lambda/streams
+          RetentionInDays: 3
+    DecoyStreams:
+        Type: Custom::S3Zip
+        DependsOn: [ S3OnDemand, DeployBucket ]
+        Properties:
+            ServiceToken: !GetAtt S3OnDemand.Arn
+            id: streams
+            Bucket: !Ref DeployBucketName
+            Key: streams.zip
+    # reusing WebsiteLambdaRole, nowmally would be separate but in this case they have the same permissions
+    StreamsLambdaFunction:
+        Type: AWS::Lambda::Function
+        DependsOn: [ DecoyStreams, DeployBucket, StreamsLog ]
+        Properties:
+            FunctionName: streams
+            MemorySize: 128
+            Handler: index.handler
+            Role: !GetAtt WebsiteLambdaRole.Arn
+            Runtime: !Ref WebsiteLambdaNodeVersion
+            Timeout: 20
+            Layers:
+               - !Sub "arn:aws:lambda:${AWS::Region}:452980636694:layer:awspilot-dynamodb-2_0_0:1"
+            Environment:
+                Variables:
+                    pusher_appId: !Ref PusherAppId
+                    pusher_key: !Ref PusherKey
+                    pusher_secret: !Ref PusherSecret
+                    pusher_cluster: !Ref PusherCluster
+            Code:
+                S3Bucket: !Ref DeployBucketName
+                S3Key: streams.zip
+
+    DbUsersStream:
+      Type: AWS::Lambda::EventSourceMapping
+      Properties:
+        BatchSize: 1
+        EventSourceArn: !GetAtt DbUsers.StreamArn
+        FunctionName: !Ref StreamsLambdaFunction
+        StartingPosition: TRIM_HORIZON
+
+    DbBTCHistoryStream:
+      Type: AWS::Lambda::EventSourceMapping
+      Properties:
+        BatchSize: 1
+        EventSourceArn: !GetAtt DbBTCHistory.StreamArn
+        FunctionName: !Ref StreamsLambdaFunction
+        StartingPosition: TRIM_HORIZON
+
+    DbGuessStream:
+      Type: AWS::Lambda::EventSourceMapping
+      Properties:
+        BatchSize: 1
+        EventSourceArn: !GetAtt DbGuess.StreamArn
+        FunctionName: !Ref StreamsLambdaFunction
+        StartingPosition: TRIM_HORIZON
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
