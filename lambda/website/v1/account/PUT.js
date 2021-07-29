@@ -63,7 +63,7 @@ module.exports = function(event, cb) {
 				name: event._POST.name,
 
 				created_at: new Date().getTime(),
-				// status: 'UNVERIFIED',
+				status: 'ACTIVE', // no verification this time
 
 				guess_id: null,
 				coins: 0,
