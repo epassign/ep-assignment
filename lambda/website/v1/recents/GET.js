@@ -30,8 +30,16 @@ module.exports = function(event, cb) {
 
 			var db = DynamoDB.batch().table('users')
 
+			var unique_users = {}
 			recents.map(function(r) {
-				db.get({user_id: r.user_id })
+				unique_users[ r.user_id] = 1;
+			})
+
+			if (Object.keys(unique_users).length)
+				return cb()
+
+			Object.keys(unique_users).map(function( user_id ) {
+				db.get({user_id: user_id })
 			})
 
 			db.read(( err, data ) => {
