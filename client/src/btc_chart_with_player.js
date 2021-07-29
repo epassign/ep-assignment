@@ -4,6 +4,9 @@ import Guess from './guess';
 
 import { api_get } from './common';
 
+// this is hardcoded here and in btc_history on insert handler
+const global_realtime_channel = '367544a50c6f7d9b454fbc14114833d7'
+
 class BTCChart extends React.Component {
 	constructor(props) {
 		super(props);
@@ -43,9 +46,10 @@ class BTCChart extends React.Component {
 			],
 
 		}
+		this.refresh = this.refresh.bind(this)
 	}
 
-	componentDidMount() {
+	refresh() {
 		api_get('/v1/history', ( err, data ) => {
 			if (err)
 				return;
@@ -64,6 +68,15 @@ class BTCChart extends React.Component {
 				current: data.current,
 			})
 		})
+	}
+	componentDidMount() {
+		this.refresh()
+
+		var global_channel = pusher.subscribe( global_realtime_channel );
+		global_channel.bind('btc', (data) => {
+			console.log("rates have changed")
+			this.refresh()
+		});
 	}
 
 	render() {
