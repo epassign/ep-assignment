@@ -35,6 +35,8 @@ module.exports = function(event, cb) {
 				unique_users[ r.user_id] = 1;
 			})
 
+console.log(unique_users) 
+
 			if (Object.keys(unique_users).length)
 				return cb()
 
