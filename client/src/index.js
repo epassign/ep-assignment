@@ -9,7 +9,11 @@ import {
 	Link
 } from "react-router-dom";
 
+import { api_get } from './common';
+
+import Nav from './nav';
 import Home from './home';
+import Account from './account';
 import Login from './login';
 import Signup from './signup';
 
@@ -17,7 +21,21 @@ class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			auth: null,
 		}
+	}
+
+	componentDidMount() {
+		api_get('/v1/auth', (err, data ) => {
+			if (err)
+				return this.setState({auth: false});
+
+			this.setState({
+				auth: data.user,
+				guess: data.guess,
+			})
+			console.log(data)
+		})
 	}
 
 	render() {
@@ -25,47 +43,28 @@ class App extends React.Component {
 
 			<Router>
 
-				<nav class="navbar navbar-expand-lg bg-dark">
-					<div class="container-fluid"> 
-						<a class="navbar-brand" href="#">
-							
-						</a> 
-						<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation"> 
-							<span class="navbar-toggler-icon"></span> 
-						</button>
-						<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-							<div class="navbar-nav ml-auto"> 
-								<Link class="nav-link active" to="/">HOME</Link> 
-
-								<Link class="nav-link" to="/login">Login</Link>
-								<Link class="nav-link" to="/signup">Signup</Link>
-
-							</div>
-						</div>
-					</div>
-
-					<form class="container-fluid justify-content-end">
-						<Link class="btn btn-sm btn-outline-secondary" to="/account"> <img src="https://i.imgur.com/C4egmYM.jpg" class="rounded-circle" width="30" /> Account</Link>
-					</form>
-				</nav>
-
-
-
-				<div class="container">
-					<Switch>
-						<Route exact path="/">
-							<Home />
-						</Route>
-						<Route path="/login">
-							<Login />
-						</Route>
-						<Route path="/signup">
-							<Signup />
-						</Route>
-					</Switch>
-				</div>
+					{
+						this.state.auth !== null ?
+						<Switch>
+							<Route exact path="/">
+								<Nav auth={this.state.auth} />
+								<Home auth={this.state.auth} guess={this.state.guess} />
+							</Route>
+							<Route path="/login">
+								<Login />
+							</Route>
+							<Route path="/signup">
+								<Signup />
+							</Route>
+							<Route path="/account">
+								<Nav auth={this.state.auth} />
+								<Account auth={this.state.auth} guess={this.state.guess} />
+							</Route>
+						</Switch>
+						: 
+						<div> {/* show loading maybe */}</div>
+					}
 			</Router>
-
 		)
 	}
 }
