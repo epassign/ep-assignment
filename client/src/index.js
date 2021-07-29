@@ -23,9 +23,10 @@ class App extends React.Component {
 		this.state = {
 			auth: null,
 		}
+		this.refresh_user = this.refresh_user.bind(this)
 	}
 
-	componentDidMount() {
+	refresh_user( cb ) {
 		api_get('/v1/auth', (err, data ) => {
 			if (err)
 				return this.setState({auth: false});
@@ -34,7 +35,24 @@ class App extends React.Component {
 				auth: data.user,
 				guess: data.guess,
 			})
-			console.log(data)
+			//console.log(data)
+			if ( cb ) cb( data.user )
+		})
+	}
+	componentDidMount() {
+		this.refresh_user(( auth ) => {
+			if ( auth ) {
+				var channel = pusher.subscribe( auth.realtime );
+				//this.setState({ channel })
+				channel.bind('coins', (data) => {
+					this.state.auth.coins = data.coins
+					this.setState({ auth: this.state.auth })
+				});
+				channel.bind('guess', (data) => {
+					// will just force a refresh of user to get the new guess
+					this.refresh_user()
+				})
+			}
 		})
 	}
 
@@ -70,5 +88,8 @@ class App extends React.Component {
 }
 
 window.onload = function() {
+	Pusher.logToConsole = true;
+	window.pusher = new Pusher('f433b80eefecd1749bdf', { cluster: 'eu' });
+
 	ReactDOM.render(<App />, document.body );
 }
