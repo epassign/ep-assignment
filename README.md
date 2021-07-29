@@ -22,7 +22,7 @@ Backend
 - - - `npm i request` ( used to make BTC api calls)
 - - - `npm i bcryptjs` ( hashes and verifies user's password )
 - - - `npm i cookie` ( parses cookies from the client )
-- Step Functions
+- Step Functions ( HTTP regional API )
 - Api Gateway 
 - DynamoDB
 - Cloudwatch Events 
