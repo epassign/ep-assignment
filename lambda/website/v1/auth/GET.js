@@ -1,4 +1,11 @@
 
+var crypto = require('crypto')
+
+var REALTIME_HASH = '2557806818'
+var _realtime_get_channel = function( subject ) {
+	return crypto.createHash('md5').update( REALTIME_HASH + '/'+ subject ).digest("hex")
+}
+
 module.exports = function(event, cb) {
 
 
@@ -92,6 +99,9 @@ module.exports = function(event, cb) {
 					avatar: 'https://i.imgur.com/C4egmYM.jpg',
 				},
 				guess,
+				realtime: {
+					auth: _realtime_get_channel( user.user_id ),
+				}
 			}, null, "\t")
 		})
 	})
