@@ -48,15 +48,15 @@ module.exports = function(event, cb) {
 
 				recents = recents.map(function(r) {
 
-				// 	data.users.map(function( user ) {
-				// 		if (r.user_id === user.user_id)
-				// 			r.user = {
-				// 				user_id: user.user_id,
-				// 				name: user.name,
-				// 				username: user.username,
-				// 				coins: user.coins,
-				// 			};
-				// 	})
+					data.users.map(function( user ) {
+						if (r.user_id === user.user_id)
+							r.user = {
+								user_id: user.user_id,
+								name: user.name,
+								username: user.username,
+								coins: user.coins,
+							};
+					})
 
 					return r;
 				})
