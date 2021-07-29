@@ -2,6 +2,11 @@
 
 EP-assesment serverless is built using the following AWS technologies
 
+> All resources used in this project are defined in Cloudformation template, see `cloudformation` folder  
+> Backend uses NodeJS 14.x 
+
+
+
 Frontend
 - webpack 
 - React 
@@ -12,6 +17,11 @@ Backend
 - Cloudformation 
 - S3 
 - Lambda 
+- - dependencies
+- - - `npm i async`
+- - - `npm i request` ( used to make BTC api calls)
+- - - `npm i bcryptjs` ( hashes and verifies user's password )
+- - - `npm i cookie` ( parses cookies from the client )
 - Step Functions
 - Api Gateway 
 - DynamoDB
