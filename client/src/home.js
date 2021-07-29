@@ -1,6 +1,9 @@
 
 import BTCChart from './btc_chart_with_player';
 
+import Recents from './recents';
+import Leaderboard from './leaderboard';
+
 class Home extends React.Component {
 	constructor(props) {
 		super(props);
@@ -16,24 +19,10 @@ class Home extends React.Component {
 				</div>
 				<div class="row mt-5">
 					<div class="col">
-						<div class="card">
-							<div class="card-header">
-								Hall of Fame
-							</div>
-							<div class="card-body">
-
-							</div>
-						</div>
+						<Leaderboard />
 					</div>
 					<div class="col">
-						<div class="card">
-							<div class="card-header">
-								Recents
-							</div>
-							<div class="card-body">
-
-							</div>
-						</div>
+						<Recents />
 					</div>
 				</div>
 			</div>
