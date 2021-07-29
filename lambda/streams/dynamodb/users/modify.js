@@ -13,5 +13,24 @@ module.exports = function(record, cb ) {
 	console.log("rec=", rec )
 	console.log("old_rec=", old_rec )
 
-	cb()
+	async.waterfall([
+
+
+		(cb) => {
+			if ( rec.coins === old_rec.coins )
+				return cb() // skip
+
+			console.log("Pusher user_id=", rec.user_id, " channel=", _realtime_get_channel( rec.user_id )  )
+
+			pusher.trigger(_realtime_get_channel( rec.user_id ) , 'coins', {
+				coins: rec.coins
+			})
+
+			cb()
+		},
+
+
+	], function(err) {
+		cb(err)
+	})
 }
