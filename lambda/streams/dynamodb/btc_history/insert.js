@@ -1,9 +1,4 @@
 
-
-
-// random channel id to broadcast btc rate changes
-const global_realtime_channel = '367544a50c6f7d9b454fbc14114833d7'
-
 module.exports = function(record, cb ) {
 	var rec = {}
 	try {
