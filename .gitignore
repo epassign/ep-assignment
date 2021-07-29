@@ -1,4 +1,5 @@
 node_modules/
 dist/
 sync-credentials
+package-lock.json
 .git
