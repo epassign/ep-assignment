@@ -52,15 +52,31 @@ class Guess extends React.Component {
 				<div class="card-body">
 				<div class="text-center">
 
-					<div style={{marginTop: 20, }}>
-						<span class="badge rounded-pill bg-primary">
-							{this.props.current.usd}
-						</span>
-						&nbsp; 🔜  &nbsp;
-						<span class="badge rounded-pill bg-secondary">
-							?
-						</span>
-					</div>
+
+					{
+						this.props.guess ?
+							<div style={{marginTop: 20, }}>
+								<span class="badge rounded-pill bg-secondary">
+									{this.props.guess.initial_rate}
+								</span>
+								&nbsp; 🔜  &nbsp;
+								<span class="badge rounded-pill bg-primary">
+									<ReactTimeAgo date={new Date(this.props.guess.created_at)} locale="en-US" timeStyle="twitter"/>
+								</span>
+							</div>
+						:
+							<div style={{marginTop: 20, }}>
+								<span class="badge rounded-pill bg-primary">
+									{this.props.current.usd}
+								</span>
+								&nbsp; 🔜  &nbsp;
+								<span class="badge rounded-pill bg-secondary">
+									?
+								</span>
+							</div>
+					}
+
+
 
 
 
@@ -86,7 +102,7 @@ class Guess extends React.Component {
 										</div>
 
 										<div>
-											<ReactTimeAgo date={new Date(this.props.guess.created_at)} locale="en-US" timeStyle="twitter"/>
+											
 										</div>
 
 									</div>
