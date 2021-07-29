@@ -408,6 +408,12 @@ Resources:
                 -
                   AttributeName: username
                   AttributeType: S
+                -
+                  AttributeName: status
+                  AttributeType: S
+                -
+                  AttributeName: coins
+                  AttributeType: N
             KeySchema:
                 -
                   AttributeName: user_id
@@ -424,6 +430,17 @@ Resources:
                     -
                         AttributeName: username
                         KeyType: HASH
+                -
+                  IndexName: top-index
+                  Projection:
+                     ProjectionType: ALL
+                  KeySchema:
+                    -
+                        AttributeName: status
+                        KeyType: HASH
+                    -
+                        AttributeName: coins
+                        KeyType: RANGE
 
     DbSessions:
         Type: AWS::DynamoDB::Table
@@ -482,8 +499,44 @@ Resources:
                   AttributeName: minute
                   KeyType: RANGE
 
-
-
+    DbGuess:
+        Type: AWS::DynamoDB::Table
+        #DeletionPolicy: Retain
+        Properties:
+            TableName: guess
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                -
+                  AttributeName: user_id
+                  AttributeType: S
+                -
+                  AttributeName: guess_id
+                  AttributeType: S
+                -
+                  AttributeName: all
+                  AttributeType: N
+                -
+                  AttributeName: created_at
+                  AttributeType: N
+            KeySchema:
+                -
+                  AttributeName: user_id
+                  KeyType: HASH
+                -
+                  AttributeName: guess_id
+                  KeyType: RANGE
+            GlobalSecondaryIndexes:
+                -
+                  IndexName: recents-index
+                  Projection:
+                     ProjectionType: ALL
+                  KeySchema:
+                    -
+                        AttributeName: all
+                        KeyType: HASH
+                    -
+                        AttributeName: created_at
+                        KeyType: RANGE
 
 
 
@@ -554,6 +607,11 @@ Resources:
                 - 'dynamodb:*'
                 Resource: '*'
 
+              - Effect: Allow
+                Action:
+                - 'states:StartExecution'
+                Resource: '*'
+
     WebsiteLog:
         Type: AWS::Logs::LogGroup
         Properties:
@@ -586,6 +644,7 @@ Resources:
                 Variables:
                     cdn_master:  !GetAtt CDN.DomainName
                     #cdn_staging: !GetAtt CDNDEV.DomainName
+                    AWS_ACCOUNT_ID: !Ref AWS::AccountId
             Code:
                 S3Bucket: !Ref DeployBucketName
                 S3Key: website.zip
@@ -680,6 +739,172 @@ Resources:
         Action: lambda:InvokeFunction
         Principal: events.amazonaws.com
         SourceArn: !GetAtt BtcFetchCron.Arn
+
+
+
+
+
+
+
+
+
+
+
+    DecoyGuessResolver:
+        Type: Custom::S3Zip
+        DependsOn: [ S3OnDemand, DeployBucket ]
+        Properties:
+            ServiceToken: !GetAtt S3OnDemand.Arn
+            id: guess-resolver
+            Bucket: !Ref DeployBucketName
+            Key: guess-resolver.zip
+
+    GuessResolverLambdaFunction:
+        Type: AWS::Lambda::Function
+        DependsOn: [ DecoyGuessResolver, DeployBucket ]
+        Properties:
+            FunctionName: guess-resolver
+            MemorySize: 128
+            Handler: index.handler
+            Role: !GetAtt WebsiteLambdaRole.Arn
+            Runtime: !Ref WebsiteLambdaNodeVersion
+            Timeout: 20
+            Layers:
+               - !Sub "arn:aws:lambda:${AWS::Region}:452980636694:layer:awspilot-dynamodb-2_0_0:1"
+            Code:
+                S3Bucket: !Ref DeployBucketName
+                S3Key: guess-resolver.zip
+
+    GuessResolverExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                - lambda.amazonaws.com
+              Action:
+              - sts:AssumeRole
+          Path: "/"
+          Policies:
+          - PolicyName: root
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+
+              - Effect: Allow
+                Action:
+                - logs:*
+                Resource: arn:aws:logs:*:*:*
+
+              - Effect: Allow
+                Action:
+                - 'dynamodb:*'
+                Resource: '*'
+
+    StepsStatesExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+          AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Principal:
+                  Service:
+                    - !Sub states.amazonaws.com
+                Action: sts:AssumeRole
+          Path: "/"
+          Policies:
+            - PolicyName: StatesExecutionPolicy
+              PolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                  - Effect: Allow
+                    Action:
+                      - lambda:InvokeFunction
+                    Resource: "*"
+
+    GuessResolverLog:
+        Type: AWS::Logs::LogGroup
+        Properties:
+          LogGroupName: /aws/lambda/guess-resolver
+          RetentionInDays: 3
+
+    GuessResolverLambdaFunction:
+        Type: AWS::Lambda::Function
+        DependsOn: [ DecoyGuessResolver, DeployBucket ]
+        Properties:
+            FunctionName: guess-resolver
+            MemorySize: 128
+            Handler: index.handler
+            Role: !GetAtt WebsiteLambdaRole.Arn
+            Runtime: !Ref WebsiteLambdaNodeVersion
+            Timeout: 20
+            Layers:
+               - !Sub "arn:aws:lambda:${AWS::Region}:452980636694:layer:awspilot-dynamodb-2_0_0:1"
+            Code:
+                S3Bucket: !Ref DeployBucketName
+                S3Key: guess-resolver.zip
+
+    GuessResolverStepFunction:
+        Type: AWS::StepFunctions::StateMachine
+        Properties:
+            StateMachineName: GuessResolverStepFunction
+            DefinitionString:
+                !Sub
+                  - |-
+                    {
+                        "StartAt": "INITIALWAIT",
+                        "States": {
+                            "INITIALWAIT": {
+                              "Type": "Wait",
+                              "Seconds": 60,
+                              "Next": "INIT"
+                            },
+                            "INIT": {
+                              "Type": "Task",
+                              "Resource": "${lambdaArn}",
+                              "Next": "Decision"
+                            },
+                            "Decision": {
+                              "Type" : "Choice",
+                              "Choices": [
+                                {
+                                    "Variable": "$.end",
+                                    "BooleanEquals": true,
+                                    "Next": "End"
+                                },
+                                {
+                                    "Variable": "$.sleep",
+                                    "NumericGreaterThan": 0,
+                                    "Next": "WAIT"
+                                }
+                              ],
+                              "Default": "ERROR"
+                            },
+                            "WAIT": {
+                              "Type": "Wait",
+                              "SecondsPath": "$.sleep",
+                              "Next": "INIT"
+                            },
+                            "ERROR": {
+                              "Type": "Wait",
+                              "Seconds": 60,
+                              "Next": "INIT"
+                            },
+                            "End": {
+                              "Type": "Pass",
+                              "End": true
+                            }
+                        }
+                    }
+                  - {lambdaArn: !GetAtt [ GuessResolverLambdaFunction, Arn ]}
+            RoleArn: !GetAtt [ StepsStatesExecutionRole, Arn ]
+
+
+
 
 
 Outputs:
