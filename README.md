@@ -2,27 +2,57 @@
 
 EP-assesment serverless is built using the following AWS technologies
 
-> All resources used in this project are defined in Cloudformation template, see `cloudformation` folder  
-> Backend uses NodeJS 14.x 
+>  
+> 
 
 
 
 Frontend
-- webpack 
 - React 
-- Bootstrap 5 
+- Bootstrap 5 ( for quick UI )
 - ReactApexCharts 
+- - used to display BTC rate chart 
+- - unfortunately adds a significant 500+ KB to the bundle 
+- webpack 
+- - builds a bundle for the frontend that is later uploaded to S3
+
 
 Backend
+- NodeJS
+- - Backend uses NodeJS 14.x 
+
 - Cloudformation 
+- - All resources used in this project are defined in Cloudformation template, see `cloudformation` folder 
+- - Exports IAM Key/Secret used for GithubActions ( Github to S3) and to sync bundle to S3
+
 - S3 
+- - bucket for static resources
+- - - mainly used to store static images, javascript and css bundle ( used together wit Cloudfront )
+- - bucket for lambda zip artifacts
+- - - on .zip upload it updates the lambda function corresponding to that function 
+- Cloudfront
+- - serves static content from S3 bucket
+- - :warning: :warning: :warning: is configured not to cache for this project, it forwards every request to S3 endpoint
+
 - Lambda 
 - - dependencies
 - - - `npm i async`
 - - - `npm i request` ( used to make BTC api calls)
 - - - `npm i bcryptjs` ( hashes and verifies user's password )
 - - - `npm i cookie` ( parses cookies from the client )
+
 - Step Functions 
+- - Guess resolver 
+- - - runs for every guess
+- - - uses **Step Functions** (more precise) instead of ~~SQS~~ (cheaper)
+- - - sleeps 60s when entering
+- - - sleeps 30s if rate did not change
+- - - updates database using transaction
+- - - - increase decrease user's coins
+- - - - unlocks user from Guessing again when current guess is resolved
+- - - - updates the guess ( there's a record for each guess )
+- - - ~~exit and terminate guess if btc rate did not change (might be problem with BTC API)~~ protection mechanism
+ 
 - Api Gateway 
 - - Pages
 - - - `GET /` - home page
@@ -37,24 +67,19 @@ Backend
 - - - `GET /v1/history` - get BTC rate history for the last 60 minus
 - - - `GET /v1/recents` - get the most recent 10 guess ( includes only resolved guesses )
 - - - `GET /v1/top` - returns a list of max 10 users sorted by their coin earings
-- DynamoDB
-- Cloudwatch Events 
 
-Tasks
-- Cron fetch BTC rate every minute 
+- DynamoDB
+- - Users Table ( Primary key on user_id so user can change his username later )
+- - Sessions Table
+- - BTC History Table - every minute cron will insert a record with BTC rates for the minute, old values do not expire 
+- - Guess-es table - history of all the guesses made by every user, partitioned by user id
+
+- Cloudwatch Events 
+- fetch BTC rate every minute 
 - - collects both USD and EUR rates
 - - uses 2 API providers, if `blockchain.info` fails will retry with `api.coindesk.com` 
 - - runs once every minute ( minim for cloudwatch events and also APIS update rates every minute too )
 - - save it to **DynamoDB** ~~Cloudwatch Metrics~~  ~~AWS Timestream~~ 
-- Guess resolver runs for every guess
-- - uses **Step Functions** (more precise) instead of ~~SQS~~ (cheaper)
-- - sleeps 60s when entering
-- - sleeps 30s if rate did not change
-- - updates database using transaction
-- - - increase decrease user's coins
-- - - unlocks user from Guessing again when current guess is resolved
-- - - updates the guess ( there's a record for each guess )
-- - ~~exit and terminate guess if btc rate did not change (might be problem with BTC API)~~ protection mechanism
 
 Pages
 - [x] home page
