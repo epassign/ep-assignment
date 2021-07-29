@@ -21,6 +21,10 @@ class Nav extends React.Component {
 		return false;
 	}
 
+	account() {
+		location.href='/account'
+	}
+
 	render() {
 		return (
 			<nav class="navbar navbar-expand-lg navbar-light" style={{backgroundColor: '#abd7f1', }}>
@@ -55,6 +59,7 @@ class Nav extends React.Component {
 								<img src={this.props.auth.avatar} class="rounded-circle" width="30" /> {this.props.auth.name}
 							</button>
 							<ul class={ "dropdown-menu dropdown-menu-dark dropdown-menu-end" + (this.state.menu_open ? ' show' : '') } aria-labelledby="dropdownMenuLink">
+								<li><Link class="dropdown-item" onMouseDown={this.account}>My Account</Link></li>
 								<li><a class="dropdown-item" onMouseDown={this.logout.bind(this)}>Logout</a></li>
 							</ul>
 						</div>
