@@ -18,6 +18,13 @@ pusher = new Pusher({
 	encrypted: true
 })
 
+// used to generate an ecryption channel name that can not be guessed
+REALTIME_HASH = '2557806818'
+_realtime_get_channel = function( subject ) {
+	return crypto.createHash('md5').update( REALTIME_HASH + '/'+ subject ).digest("hex")
+}
+
+
 exports.handler = function( event, context, cb ) {
 	async.each(event.Records, function(record, cb) {
 
