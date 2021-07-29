@@ -88,7 +88,7 @@ class App extends React.Component {
 }
 
 window.onload = function() {
-	Pusher.logToConsole = true;
+	//Pusher.logToConsole = true;
 	window.pusher = new Pusher('f433b80eefecd1749bdf', { cluster: 'eu' });
 
 	ReactDOM.render(<App />, document.body );
