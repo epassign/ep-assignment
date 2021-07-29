@@ -15,7 +15,7 @@ module.exports = function(record, cb ) {
 
 	async.waterfall([
 
-
+		// notify authenticated user
 		(cb) => {
 			if ( rec.coins === old_rec.coins )
 				return cb() // skip
@@ -28,6 +28,17 @@ module.exports = function(record, cb ) {
 
 			cb()
 		},
+
+		// notify global users (to refresh the leaderboard)
+		// this should be optimized to notify users to refresh only if the current user is in top 10
+		(cb) => {
+			if ( rec.coins === old_rec.coins )
+				return cb() // skip
+
+			pusher.trigger( global_realtime_channel , 'top', {})
+			cb()
+		},
+
 
 		(cb) => {
 			if ( rec.guess_id === old_rec.guess_id )
