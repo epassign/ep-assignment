@@ -22,8 +22,21 @@ Backend
 - - - `npm i request` ( used to make BTC api calls)
 - - - `npm i bcryptjs` ( hashes and verifies user's password )
 - - - `npm i cookie` ( parses cookies from the client )
-- Step Functions ( HTTP regional API )
+- Step Functions 
 - Api Gateway 
+- - Pages
+- - - `GET /` - home page
+- - - `GET /login` - login page, logs user in and redirects to /account
+- - - `GET /signup` - signup page, registers the user ( no email verification made ) then redirects to /account
+- - - `GET /account` - account page, checks cookie and redirects to /login if no valid session found
+- - API ( HTTP regional API )
+- - - `PUT /v1/account` - account signup
+- - - `PUT /v1/auth` - account login
+- - - `GET /v1/auth` - get current login ( returns user and user's guess )
+- - - `PUT /v1/guess` - submit a new guess
+- - - `GET /v1/history` - get BTC rate history for the last 60 minus
+- - - `GET /v1/recents` - get the most recent 10 guess ( includes only resolved guesses )
+- - - `GET /v1/top` - returns a list of max 10 users sorted by their coin earings
 - DynamoDB
 - Cloudwatch Events 
 
