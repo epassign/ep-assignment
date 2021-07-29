@@ -46,6 +46,8 @@ module.exports = function(event, cb) {
 				if (err)
 					return cb({success: false, errorCode: 'TMP_ERR', debug: err })
 
+console.log(data) 
+
 				recents = recents.map(function(r) {
 
 					data.users.map(function( user ) {
