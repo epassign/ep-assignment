@@ -11,6 +11,13 @@ module.exports = function(event, cb) {
 	async.waterfall([
 
 		( cb ) => {
+
+			if ( !username )
+				return cb({ success: false, errorCode: 'INVALID_USERNAME'})
+
+			if ( ! username.match(/^[a-z0-9]+$/u) )
+				return cb({ success: false, errorCode: 'INVALID_USERNAME', errorMessage: 'Username can only contain letts and numbers'})
+
 			DynamoDB
 				.table('users')
 				.index('username-index')
