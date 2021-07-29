@@ -74,7 +74,6 @@ class BTCChart extends React.Component {
 
 		var global_channel = pusher.subscribe( global_realtime_channel );
 		global_channel.bind('btc', (data) => {
-			console.log("rates have changed")
 			this.refresh()
 		});
 	}
