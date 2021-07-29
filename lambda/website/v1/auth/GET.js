@@ -97,11 +97,10 @@ module.exports = function(event, cb) {
 					name: user.name,
 					coins: user.coins,
 					avatar: 'https://i.imgur.com/C4egmYM.jpg',
+
+					realtime: _realtime_get_channel( user.user_id ),
 				},
 				guess,
-				realtime: {
-					auth: _realtime_get_channel( user.user_id ),
-				}
 			}, null, "\t")
 		})
 	})
