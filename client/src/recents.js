@@ -1,21 +1,34 @@
 
 import { api_get } from './common';
 
+// this is hardcoded here and in btc_history on insert handler
+const global_realtime_channel = '367544a50c6f7d9b454fbc14114833d7'
+
 class Recents extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			recents: []
 		}
+		this.refresh = this.refresh.bind(this)
 	}
 
-	componentDidMount() {
+	refresh() {
 		api_get('/v1/recents', ( err, data ) => {
 			if (err)
 				return;
 
 			this.setState({ recents: data.recents }) 
 		})
+	}
+	componentDidMount() {
+
+		this.refresh()
+
+		var global_channel = pusher.subscribe( global_realtime_channel );
+		global_channel.bind('guess', (data) => {
+			this.refresh()
+		});
 	}
 	render() {
 		return (
