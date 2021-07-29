@@ -91,7 +91,7 @@ Backend
 - - - `PUT /v1/account` - account signup
 - - - `PUT /v1/auth` - account login
 - - - `GET /v1/auth` - get current login ( returns user and user's guess )
-- - - `PUT /v1/guess` - submit a new guess
+- - - `PUT /v1/guess` - submit a new guess, will check if user is not already in another guess and if btc rate has not been changed in the meantime
 - - - `GET /v1/history` - get BTC rate history for the last 60 minus
 - - - `GET /v1/recents` - get the most recent 10 guess ( includes only resolved guesses )
 - - - `GET /v1/top` - returns a list of max 10 users sorted by their coin earings
