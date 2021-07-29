@@ -13,7 +13,10 @@ import ReactTimeAgo from 'react-time-ago'
 class Guess extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
+		this.props = {
+			//current: props.current,
+			// guess: props.guess,
+			// auth: props.auth,
 		}
 	}
 
@@ -64,7 +67,7 @@ class Guess extends React.Component {
 
 					{
 						this.props.auth === false ?
-						<p class="card-text">
+						<p class="card-text mt-5">
 							Please <Link to="/signup">signup</Link> or <Link to="/login">login</Link> to play
 						</p>
 						: 
@@ -93,19 +96,11 @@ class Guess extends React.Component {
 										<button type="button" class="btn btn-outline-primary" style={{width: 100, }} onClick={this.guess_up.bind(this)}>UP</button>
 									</div>
 							}
-
-
-
 						</div>
 					}
-
 					</div>
 				</div>
 			</div>
-
-
-
-
 		)
 	}
 }
