@@ -31,13 +31,11 @@ module.exports = function(event, cb) {
 			var db = DynamoDB.batch().table('users')
 
 			var unique_users = {}
-			recents.map(function(r) {
+			recents.map((r) => {
 				unique_users[ r.user_id] = 1;
 			})
 
-console.log("unique_users=", unique_users) 
-
-			if (Object.keys(unique_users).length)
+			if (!Object.keys(unique_users).length)
 				return cb()
 
 			Object.keys(unique_users).map(function( user_id ) {
@@ -48,7 +46,7 @@ console.log("unique_users=", unique_users)
 				if (err)
 					return cb({success: false, errorCode: 'TMP_ERR', debug: err })
 
-console.log("data=",data) 
+				console.log("data=",data) 
 
 				recents = recents.map(function(r) {
 
