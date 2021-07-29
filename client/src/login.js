@@ -47,7 +47,7 @@ class Login extends React.Component {
 
 										<div class="form-outline mb-3">
 											<label class="form-label" for="username">Username</label>
-											<input type="text" id="username" class="form-control form-control-md" placeholder="" value={this.state.username} onChange={(e) => this.setState({ username: e.target.value }) } />
+											<input type="text" id="username" class="form-control form-control-md" placeholder="" value={this.state.username} onChange={(e) => this.setState({ username: e.target.value }) } style={{ textTransform: 'lowercase' }} />
 										</div>
 
 										<div class="form-outline mb-3">
