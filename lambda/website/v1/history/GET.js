@@ -66,14 +66,18 @@ module.exports = function(event, cb) {
 								parseInt(k),
 								usd_history[k]
 							]
-						}).slice(-60),
+						})
+						.filter((row) => { return row[1] !== 0 })
+						.slice(-60),
 					eur:
 						Object.keys( eur_history).map((k) => {
 							return [
 								parseInt(k),
 								eur_history[k]
 							]
-						}).slice(-60),
+						})
+						.filter((row) => { return row[1] !== 0 })
+						.slice(-60),
 				},
 				current,
 				//raw,
