@@ -25,7 +25,38 @@ module.exports = function(event, cb) {
 		},
 
 
+		// enrich each user
+		function( cb ) {
 
+			var db = DynamoDB.batch().table('users')
+
+			recents.map(function(r) {
+				db.get({user_id: r.user_id })
+			})
+
+			db.read()
+			.then(( data ) => {
+				recents = recents.map(function(r) {
+
+					data.users.map(function( user ) {
+						if (r.user_id === user.user_id)
+							r.user = {
+								user_id: user.user_id,
+								name: user.name,
+								username: user.username,
+								coins: user.coins,
+							};
+					})
+
+					return r;
+				})
+
+				cb()
+			})
+			.catch((err) => {
+				cb({success: false, errorCode: 'TMP_ERR',})
+			})
+		},
 
 	], (err) => {
 		if (err)
