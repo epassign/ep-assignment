@@ -26,7 +26,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch(( err ) => {
-					return cb({ success: false, errorCode: 'TMP_ERR'})
+					return cb({ success: false, errorCode: 'TMP_ERR', debug: err, })
 				})
 		},
 
@@ -45,7 +45,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch((err) => {
-					cb({success: false, errorCode: 'TMP_ERR',})
+					cb({success: false, errorCode: 'TMP_ERR', debug: err,})
 				})
 		},
 
@@ -70,7 +70,7 @@ module.exports = function(event, cb) {
 					cb()
 				})
 				.catch((err) => {
-					cb({success: false, errorCode: 'TMP_ERR',})
+					cb({success: false, errorCode: 'TMP_ERR', debug: err,})
 				})
 		},
 
