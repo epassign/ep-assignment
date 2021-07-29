@@ -47,9 +47,8 @@ class Nav extends React.Component {
 						:
 						<div class="dropdown">
 							<button 
-								class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+								class="btn btn-sm btn-secondary dropdown-toggle" 
 								style={{minWidth: 150,	textAlign: 'left' }} 
-								//onFocus={ () => this.setState({menu_open: true}) }
 								onBlur={ () => this.setState({menu_open: false}) }
 								onClick={ () => this.setState({menu_open: !this.state.menu_open}) }
 							>
